@@ -22,9 +22,9 @@ class NeuralNetwork:
 		self.oh = np.ones(self.nh + 1)
 		self.oo = np.ones(self.no)
 
-		# create random weights [-1, 1]
-		self.wi = np.random.rand(self.ni + 1, self.nh)*2-1
-		self.wo = np.random.rand(self.nh + 1, self.no)*2-1
+		# create random weights [0, 1]
+		self.wi = np.random.rand(self.ni + 1, self.nh)
+		self.wo = np.random.rand(self.nh + 1, self.no)
 
 	def backPropagate(self,D,l,iterations=1000):
 		for it in range(iterations):

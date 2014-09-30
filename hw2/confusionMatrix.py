@@ -14,8 +14,5 @@ def confusionMatrix(predicted,labels):
 				fn += 1
 			else:
 				tn += 1
-	tpr = tp/float(tp+fn)
-	fpr = fp/float(fp+tn)
-	tnr = tn/float(tn+fp)
-	fnr = fn/float(fn+tp)
-	return np.array([tpr,fpr,tnr,fnr])
+
+	return np.array([tp,fp,tn,fn], dtype=int)

@@ -2,7 +2,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 import confusionMatrix as cm
 
-def plotROC(X,y,w,file_name):
+# rtype is one of "Linear", "Logistic"
+def plotROC(X,y,w,rtype):
 	
 	y_predict = np.dot(X,w)
 	t = np.unique(y_predict)
@@ -13,18 +14,17 @@ def plotROC(X,y,w,file_name):
 	for i in range(len(t)):
 		y1 = predictBoolean(y_predict,t[i])
 		conf_m = cm.confusionMatrix(y1,y)
-		tprs[i] = conf_m[0]
-		fprs[i] = conf_m[1]
+		tprs[i],fprs[i] = tp_fp_rates(conf_m)
 
 	a = auc(fprs, tprs)
-	print "AUC: ", a
 
 	plt.clf()
 	plt.plot(fprs, tprs)
 	plt.axis([0, 1, 0, 1])
+	plt.title("ROC curve for %s Regression, AUC: %-2f" %(rtype,a))
 	plt.ylabel("True Positive Rate")
 	plt.xlabel("False Positive Rate")
-	plt.savefig(file_name)
+	plt.savefig("ROC_%s_Regression.png" %rtype)
 
 def predictBoolean(y,threshold):
 	y_predict = np.zeros(len(y))
@@ -43,3 +43,9 @@ def auc(xs,ys):
 		area += (x2-x1)*(y1+y2)*0.5
 
 	return area
+
+def tp_fp_rates(confusion_matrix):
+	tp,fp,tn,fn = confusion_matrix
+	tpr = tp/float(tp+fn)
+	fpr = fp/float(fp+tn)
+	return tpr,fpr

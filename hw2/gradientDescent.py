@@ -13,6 +13,7 @@ def gradientDescent(X,y,w,alpha,iters,linear):
 			return w
 		else:
 			old_w = np.copy(w)
+		alpha = alpha * 0.9
 	return w
 
 def linearH(w,x):
