@@ -12,7 +12,7 @@ def problem2():
 	w = pcpt.perceptron(X,y)
 
 	print "Classifier weights: ", w
-	print "Normalized with threshold: ", w[1:]/w[0]
+	print "Normalized with threshold: ", w[1:]/-w[0]
 	print "============================================="
 
 if __name__ == "__main__":
