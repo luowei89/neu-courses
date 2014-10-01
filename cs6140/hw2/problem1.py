@@ -121,7 +121,7 @@ def problem1():
 
 	print "the average acc (train) is: %f" %(1-np.mean(mses_train))
 	print "the average acc (test) is: %f" %(1-np.mean(mses))
-	print "the confusion matrix is: (TPR,FPR,TNR,FNR)"
+	print "the confusion matrix is: (TP,FP,TN,FN)"
 	print conf_m/K
 	print "============================================="
 
