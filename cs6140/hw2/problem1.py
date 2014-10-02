@@ -25,9 +25,8 @@ def problem1():
 	ht_X,ht_y = gd.extractData(housing_test)
 	
 	print "training for linear regression with gradient descent..."
-	w = np.zeros(h_X.shape[1])
 	h_X_norm,h_X_means,h_X_stds = gd.normalize(h_X)
-	w = gd.gradientDescent(h_X_norm,h_y,w,alpha,iterations,linear)
+	w = gd.gradientDescent(h_X_norm,h_y,alpha,iterations,linear)
 
 	print "predict for housing training data, mse is:"
 	htrain_predict = gd.predict(h_X_norm,w)
@@ -61,9 +60,8 @@ def problem1():
 		train_X,train_y = gd.extractData(train)
 		test_X,test_y = gd.extractData(test)
 
-		w = np.zeros(train_X.shape[1])
 		train_X_norm,t_means,t_stds =  gd.normalize(train_X)
-		w = gd.gradientDescent(train_X_norm,train_y,w,beta,iterations,linear)
+		w = gd.gradientDescent(train_X_norm,train_y,beta,iterations,linear)
 
 		test_X_norm = gd.normalizeMS(test_X,t_means,t_stds)
 
@@ -101,9 +99,8 @@ def problem1():
 		train_X,train_y = gd.extractData(train)
 		test_X,test_y = gd.extractData(test)
 
-		w = np.zeros(train_X.shape[1])
 		train_X_norm,t_means,t_stds =  gd.normalize(train_X)
-		w = gd.gradientDescent(train_X_norm,train_y,w,gama,iterations,logistic)
+		w = gd.gradientDescent(train_X_norm,train_y,gama,iterations,logistic)
 
 		test_X_norm = gd.normalizeMS(test_X,t_means,t_stds)
 

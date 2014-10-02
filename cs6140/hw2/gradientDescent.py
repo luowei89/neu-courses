@@ -1,7 +1,8 @@
 import numpy as np
 import math
 
-def gradientDescent(X,y,w,alpha,iters,linear):
+def gradientDescent(X,y,alpha,iters,linear):
+	w = np.zeros(X.shape[1])
 	h = linearH if linear else logisticH
 	m = len(y)
 	n = len(w)
