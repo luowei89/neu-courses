@@ -42,7 +42,6 @@ def readData(filename):
 			venue = line[len(vn_head)+1:].rstrip()
 			venues.add(venue)
 	fdata.close()
-	print ct
 	return authors,pubs,venues
 
 def pubs_per_author(authors):
