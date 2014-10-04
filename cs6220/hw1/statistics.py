@@ -1,5 +1,6 @@
 # Know Your Data
 import time
+import numpy as np
 import matplotlib.pyplot as plt
 
 DTAT_FILE = "../dm_dataset/AP_train.txt"
@@ -45,27 +46,43 @@ def readData(filename):
 	return authors,pubs,venues
 
 def pubs_per_author(authors):
-	return {au:len(authors[au]) for au in authors}
+	return [len(authors[au]) for au in authors]
 
 def cites_per_author(authors,pubs):
-	return {au:sum(pubs[pub] for pub in authors[au]) for au in authors}
+	return [sum(pubs[pub] for pub in authors[au]) for au in authors]
 
-def plot_histogram(dict_nums,filename):
+def plot_histogram(nums,xstep,title):
+	x = ceil(max(nums)/xstep*1.0)*xstep
+	plt.clf()
+	plt.hist(nums,x/xstep,bottom=0.1)
+	plt.yscale('log')
+	plt.title(title)
+	plt.savefig("%s.png" %title)
 
-	fig = plt.figure()
-	x = dict_nums.keys()
-	y = dict_nums.values()
-	
-	plt.savefig(filename)
+def plot_scatter(ppa,cpa):
+	x = np.array(ppa)
+	y = np.array(cpa)
+	x5 = x[x[:]>5]
+	y5 = y[x[:]>5]
+	plt.clf()
+	plt.scatter(x5, y5)
+	plt.xlabel("number of publications")
+	plt.ylabel("number of citations")
+	plt.savefig("num_pubs_vs_num_cites.png")
 
+def ceil(x):
+	if x == int(x):
+		return x
+	else:
+		return int(x)+1
 # return min max q1 q3 median numbers of the list 
-def stat_numbers(dict_nums):
-	list_nums = [dict_nums[num] for num in dict_nums]
-	n = len(list_nums)
-	sorted_list = sorted(list_nums)
-	return sorted_list[0],sorted_list[n-1],sorted_list[n/4],sorted_list[n*3/4],sorted_list[n/2],
+def stat_numbers(nums):
+	n = len(nums)
+	sorted_list = sorted(nums)
+	return sorted_list[0],sorted_list[n-1],sorted_list[n/4],sorted_list[n*3/4],sorted_list[n/2]
 
 if __name__ == '__main__':
+
 	print "========================================"
 	start_time = time.time()
 	print "Loading data..."
@@ -80,7 +97,8 @@ if __name__ == '__main__':
 	ppa = pubs_per_author(authors)
 	print "min\tmax\tq1\tq3\tmedian"
 	print "%d\t%d\t%d\t%d\t%d\t" %stat_numbers(ppa)
-	#plot_histogram(ppa,"publications_per_author.png")
+	print "Ploting histogram..."
+	plot_histogram(ppa,100,"publications_per_author")
 	print "Time used: %f seconds" %(time.time() - start_time)
 	print "========================================"
 	print "========================================"
@@ -89,7 +107,10 @@ if __name__ == '__main__':
 	cpa = cites_per_author(authors,pubs)
 	print "min\tmax\tq1\tq3\tmedian"
 	print "%d\t%d\t%d\t%d\t%d\t" %stat_numbers(cpa)
-	# print "Ploting histogram..."
-	# plot_histogram
+	print "Ploting histogram..."
+	plot_histogram(cpa,1000,"citations_per_author")
 	print "Time used: %f seconds" %(time.time() - start_time)
+	print "========================================"
+	print "Ploting scatter plot..."
+	plot_scatter(ppa,cpa)
 	print "========================================"
