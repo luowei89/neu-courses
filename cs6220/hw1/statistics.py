@@ -65,7 +65,7 @@ def plot_scatter(ppa,cpa):
 	x5 = x[x[:]>5]
 	y5 = y[x[:]>5]
 	plt.clf()
-	plt.scatter(x5, y5)
+	plt.scatter(x5,y5,s=5)
 	plt.xlabel("number of publications")
 	plt.ylabel("number of citations")
 	plt.savefig("num_pubs_vs_num_cites.png")
@@ -79,7 +79,7 @@ def ceil(x):
 def stat_numbers(nums):
 	n = len(nums)
 	sorted_list = sorted(nums)
-	return sorted_list[0],sorted_list[n-1],sorted_list[n/4],sorted_list[n*3/4],sorted_list[n/2]
+	return sorted_list[0],sorted_list[n-1],sorted_list[n/4],sorted_list[n*3/4],sorted_list[n/2],
 
 if __name__ == '__main__':
 
