@@ -97,5 +97,43 @@ Since there is only one feature Color left as candidate, we use it for split. Si
 Then we finished building the decision tree.\\
 \newpage \noindent
 \textbf{3.} Na\"{i}ve Bayes\\
+By looking in to three features \{secret, sports, dollar\}, the message table can be abstracted as:\\
+\begin{tabular}{|l|l|l|l|}
+\hline
+secret&sports&dollar&label\\
+\hline
+0&0&1&spam\\
+1&0&0&spam\\
+1&0&0&spam\\
+0&0&0&non-spam\\
+1&1&0&non-spam\\
+0&1&0&non-spam\\
+0&0&0&non-spam\\
+\hline
+\end{tabular}\\
+Then by counting, we can calculate MLEs as:\\
+$\theta_{spam} = P(C_{spam}) = 3/7$\\
+$\theta_{secret|spam}  = P(secret=1|C_{spam}) = 2/3$\\
+$\theta_{secret|non-spam} = P(secret=1|C_{non-spam}) = 1/4$\\
+$\theta_{sports|non-spam} = P(sports=1|C_{non-spam}) = 2/4$\\
+$\theta_{dollar|spam} = P(dollar=1|C_{spam}) = 1/3$\\
+\\ \\ \\
 \textbf{4.} Support Vector Machine\\
+(1) The support vectors are data points \{7,18,20\}: \\
+\indent $(0.53,0.77)$, $(2.05,-0.62)$, $(1.63,-0.91)$\\
+(2) $\mathbf{w} = [w_0,w_1,w_2]$\\
+$w_0+0.53w_1+0.77w_2=1$\\
+$w_0+2.05w_1-0.62w_2=-1$\\
+$w_0+1.63w_1-0.91w_2=-1$\\
+Solve the equations, we get $w_0=0.6687$, $w_1=-0.5661$,$w_2=0.8198$\\
+So $\mathbf{w}=[0.6687,-0.5661,0.8198]$\\
+(3) For calculating bais b:\\
+$x[\alpha_k\ne0]=[(0.53,0.77), (2.05,-0.62), (1.63,-0.91)]$\\
+$w' = [-0.5661, 0.8198]$,$y = [1,-1,-1]$, $N_k=3$\\
+$b=\sum_{k:\alpha_k\ne0}(y_k-w'x_k)/N_k=0.6687$\\
+(4) The learned decision boundary function is:\\
+$f(x)=f((x_1,x_2))=0.6687-0.5661x_1+0.8198x_2$\\
+(5) For data point $x = (-1,2)$:\\
+$f(x)=0.6687-0.5661x_1+0.8198x_2=2.8744>1$\\
+So  the predicted label for x is 1.\\
 \end{document}
