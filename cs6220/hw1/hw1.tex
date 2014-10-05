@@ -1,7 +1,6 @@
 \documentclass[11pt,a4paper,fleqn]{article}
 \usepackage[margin=1in]{geometry}
 \usepackage{graphicx} 
-\usepackage{tikz}
 \begin{document}
 \begin{center}
 \textbf{CS6220 Datamining Fall 2014 Homework 1, Wei Luo}\\
@@ -94,7 +93,10 @@ We choose feature Shape for split at $node_3$ since it has more information gain
 Now we move one step further to the left sub-tree, there are 6 data points, given that their Size is Large and Shape is Round. All the Color for this level is Yellow, so we stop splitting. And since $P(-)=\frac{3}{4}$, we make a leaf node of $-$ here.\\
 Now we go back and see the right child of $node_3$, there are 2 data points, given that their Size is Large and Shape is Irregular. (We are at $node_4$, the right child of $node_3$)\\
 Since there is only one feature Color left as candidate, we use it for split. Since $P(-|g)=1$ and $P(+|y) = 1$, we make a leaf node of $-$ at the Green branch, a leaf node of $+$ at the Yellow branch.\\
-Then we finished building the decision tree.\\
+Then we finished building the decision tree. And it looks like\\
+\begin{center}
+\includegraphics[scale=0.6]{decision_tree.png}\\
+\end{center}
 \newpage \noindent
 \textbf{3.} Na\"{i}ve Bayes\\
 By looking in to three features \{secret, sports, dollar\}, the message table can be abstracted as:\\
@@ -122,18 +124,31 @@ $\theta_{dollar|spam} = P(dollar=1|C_{spam}) = 1/3$\\
 (1) The support vectors are data points \{7,18,20\}: \\
 \indent $(0.53,0.77)$, $(2.05,-0.62)$, $(1.63,-0.91)$\\
 (2) $\mathbf{w} = [w_0,w_1,w_2]$\\
-$w_0+0.53w_1+0.77w_2=1$\\
-$w_0+2.05w_1-0.62w_2=-1$\\
-$w_0+1.63w_1-0.91w_2=-1$\\
-Solve the equations, we get $w_0=0.6687$, $w_1=-0.5661$,$w_2=0.8198$\\
-So $\mathbf{w}=[0.6687,-0.5661,0.8198]$\\
+\indent $w_0+0.53w_1+0.77w_2=1$\\
+\indent $w_0+2.05w_1-0.62w_2=-1$\\
+\indent $w_0+1.63w_1-0.91w_2=-1$\\
+\indent Solve the equations, we get $w_0=0.6687$, $w_1=-0.5661$,$w_2=0.8198$\\
+\indent So $\mathbf{w}=[0.6687,-0.5661,0.8198]$\\
 (3) For calculating bais b:\\
-$x[\alpha_k\ne0]=[(0.53,0.77), (2.05,-0.62), (1.63,-0.91)]$\\
-$w' = [-0.5661, 0.8198]$,$y = [1,-1,-1]$, $N_k=3$\\
-$b=\sum_{k:\alpha_k\ne0}(y_k-w'x_k)/N_k=0.6687$\\
+\indent $x[\alpha_k\ne0]=[(0.53,0.77), (2.05,-0.62), (1.63,-0.91)]$\\
+\indent $w' = [-0.5661, 0.8198]$,$y = [1,-1,-1]$, $N_k=3$\\
+\indent $b=\sum_{k:\alpha_k\ne0}(y_k-w'x_k)/N_k=0.6687$\\
 (4) The learned decision boundary function is:\\
-$f(x)=f((x_1,x_2))=0.6687-0.5661x_1+0.8198x_2$\\
+\indent $f(x)=f((x_1,x_2))=0.6687-0.5661x_1+0.8198x_2$\\
 (5) For data point $x = (-1,2)$:\\
-$f(x)=0.6687-0.5661x_1+0.8198x_2=2.8744>1$\\
-So  the predicted label for x is 1.\\
+\indent $f(x)=0.6687-0.5661x_1+0.8198x_2=2.8744>1$\\
+\indent So  the predicted label for $x$ is 1.\\
+\\ \\ \\
+\textbf{5.} Mutual Information and Information Gain\\
+Consider $Y$ as the class label, and $X$ as the attribute to predict $Y$, we have:\\
+$H(Y) = \sum_yp(y)\log\frac{1}{p(y)}$\\
+$H(Y|X) = \sum_xp(x)\sum_yp(y|x)\log\frac{1}{p(y|x)}$\\
+$IG(X) = H(Y)-H(Y|X)= \sum_yp(y)\log\frac{1}{p(y)}-\sum_xp(x)\sum_yp(y|x)\log\frac{1}{p(y|x)}$\\
+Since $p(y)=\sum_xp(x,y)$, $p(y|x)=p(x,y)/p(x)$, we have:\\
+\begin{tabular}{ll}
+$IG(X)$&$= \sum_y\sum_xp(x,y)\log\frac{1}{p(y)}-\sum_xp(x)\sum_yp(x,y)/p(x)\log\frac{1}{p(x,y)/p(x)}$\\
+&$=\sum_x\sum_yp(x,y)(\log\frac{1}{p(y)}-\log\frac{1}{p(x,y)/p(x))})$\\
+&$=\sum_x\sum_yp(x,y)(\log\frac{p(x,y)}{p(x)p(y)})$\\
+\end{tabular}\\
+It is the same as mutual information, $I(X;Y)$
 \end{document}
