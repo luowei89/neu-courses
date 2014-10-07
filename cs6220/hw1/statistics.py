@@ -3,7 +3,7 @@ import time
 import numpy as np
 import matplotlib.pyplot as plt
 
-DTAT_FILE = "../dm_dataset/AP_train.txt"
+DTAT_FILE = "../dm_dataset/AP_train/AP_train.txt"
 
 id_head = "#index"	# publication id header
 au_head = "#@"		# author header
