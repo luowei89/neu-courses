@@ -28,13 +28,13 @@ def bernoulli_pridect(X,phi,thres,prob):
 	return [bernoulli_pridect_single(x,phi,thres,prob) for x in X]
 
 def bernoulli_pridect_single(x,phi,thres,prob):
-	p0 = bernoulli_prob(x,thres[0],prob[0]) * (1-phi)
-	p1 = bernoulli_prob(x,thres[1],prob[1]) * phi
+	p0 = bernoulli_prob(x,thres[0],prob[0]) + np.log(1-phi)
+	p1 = bernoulli_prob(x,thres[1],prob[1]) + np.log(phi)
 	return 1 if p1 > p0 else 0
 
 def bernoulli_prob(x,thres,prob):
 	probs = [prob[i] if x[i] <= thres[i] else (1-prob[i]) for i in range(len(x))]
-	return np.prod(probs)
+	return sum(np.log(probs)) # log to avoid underflow
 
 if __name__ == "__main__":
 	print "============================================="

@@ -28,17 +28,17 @@ def gaussian_pridect(X,phi,mu,sigma):
 	return [gaussian_pridect_single(x,phi,mu,sigma) for x in X]
 
 def gaussian_pridect_single(x,phi,mu,sigma):
-	p0 = gaussian_prob(x,mu[0],sigma[0]) * (1-phi)
-	p1 = gaussian_prob(x,mu[1],sigma[1]) * phi
+	p0 = gaussian_prob(x,mu[0],sigma[0]) + np.log(1-phi)
+	p1 = gaussian_prob(x,mu[1],sigma[1]) + np.log(phi)
 	return 1 if p1 > p0 else 0
 
 def gaussian_prob(x,mu,sigma):
-	probs = [gaussian_prob_one(x[i],mu[i],sigma[i]) for i in range(len(x))]
-	return np.prod(probs)
+	log_probs = [gaussian_prob_one(x[i],mu[i],sigma[i]) for i in range(len(x))]
+	return sum(log_probs)
 
 def gaussian_prob_one(x,mu,sigma):
-	xx = np.exp(-0.5*((mu-mu)**2)/sigma)/np.sqrt(2*np.pi*sigma)
-	return np.exp(-0.5*((x-mu)**2)/sigma)/np.sqrt(2*np.pi*sigma)
+	log_pdf_x = -0.5*np.log(2*np.pi*sigma)-0.5*(x-mu)**2/sigma
+	return log_pdf_x if log_pdf_x < 0 else 0 # when pdf > 1 set it to 1
 
 if __name__ == "__main__":
 	print "============================================="

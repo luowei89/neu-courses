@@ -38,6 +38,8 @@ def laplace_prob(x,thres):
 
 
 def bucket(x,n):
+	if n == 2: # Bernoulli?
+		return np.array([-np.inf,np.mean(x),np.inf])
 	if n == 4:
 		return bucket_4(x)
 	else:
@@ -66,13 +68,13 @@ def histogram_predict(X,phi,predictor):
 	return [histogram_predict_single(x,phi,predictor) for x in X]
 
 def histogram_predict_single(x,phi,predictor):
-	p0 = histogram_prob(x,predictor[0]) * (1-phi)
-	p1 = histogram_prob(x,predictor[1]) * phi
+	p0 = histogram_prob(x,predictor[0]) + np.log(1-phi)
+	p1 = histogram_prob(x,predictor[1]) + np.log(phi)
 	return 1 if p1 > p0 else 0
 
 def histogram_prob(x,predictor):
 	probs = [caculate_one_prob(x[i],predictor[i]) for i in range(len(x))]
-	return np.prod(probs)
+	return sum(np.log(probs))
 
 def caculate_one_prob(x,predictor):
 	thres = predictor["thres"]
@@ -82,7 +84,6 @@ def caculate_one_prob(x,predictor):
 		if x > thres[i] and x <= thres[i+1]:
 			return probs[i]
 	return 0
-
 
 def navie_bayes_histogram(spambase,n_bins):
 	n = spambase.shape[1]
@@ -114,6 +115,6 @@ if __name__ == "__main__":
 	spambase = np.loadtxt("../dataset/spambase/spambase.data", delimiter=",")
 	np.random.shuffle(spambase)
 
-	navie_bayes_histogram(spambase,4)
+	navie_bayes_histogram(spambase,2)
 
 	
