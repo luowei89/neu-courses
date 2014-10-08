@@ -2,6 +2,7 @@
 Naive Bayes Model with Bernoulli (Boolean) random variables
 """
 import numpy as np
+import errorRates as er
 
 K = 10
 
@@ -43,9 +44,7 @@ if __name__ == "__main__":
 	np.random.shuffle(spambase)
 
 	n = spambase.shape[1]
-	train_errs = np.zeros(K)
-	errs = np.zeros(K)
-
+	err_rates = np.zeros((K,3))
 	k_folds = np.array_split(spambase,K)
 
 	print "============================================="
@@ -57,10 +56,12 @@ if __name__ == "__main__":
 
 		phi,threshold,prob = bernoulli_learn(train)
 		y_test = bernoulli_pridect(test[:,:n-1],phi,threshold,prob)
-		errs[i] = np.mean((y_test-test[:,n-1])**2)
-		y_train = bernoulli_pridect(train[:,:n-1],phi,threshold,prob)
-		train_errs[i] = np.mean((y_train-train[:,n-1])**2)
-		print "train error: %f, test error: %f" %(train_errs[i], errs[i])
-	print "the average train error rate is: %f" %np.mean(train_errs)
-	print "the average test error rate is: %f" %np.mean(errs)
+		errors = er.error_rates(y_test,test[:,n-1])
+		err_rates[i] = errors
+		print errors
+		#print "\\hline"#latex print table
+		#print "%d&%f&%f&%f\\\\" %(i+1,errors[0],errors[1],errors[2])#latex print table
+		
+	print "the average test error rate is:" 
+	print np.mean(err_rates,axis=0)
 	print "============================================="

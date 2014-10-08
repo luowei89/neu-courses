@@ -2,7 +2,7 @@
 Naive Bayes Model with n-bins histogram
 """
 import numpy as np
-
+import errorRates as er
 K = 10
 
 def histogram_learn(D,n_bins):
@@ -87,9 +87,7 @@ def caculate_one_prob(x,predictor):
 
 def navie_bayes_histogram(spambase,n_bins):
 	n = spambase.shape[1]
-	train_errs = np.zeros(K)
-	errs = np.zeros(K)
-
+	err_rates = np.zeros((K,3))
 	k_folds = np.array_split(spambase,K)
 
 	print "============================================="
@@ -101,12 +99,12 @@ def navie_bayes_histogram(spambase,n_bins):
 		train = np.vstack(np.delete(k_folds, i, axis=0))
 		phi,predictor = histogram_learn(train,n_bins)
 		y_test = histogram_predict(test[:,:n-1],phi,predictor)
-		errs[i] = np.mean((y_test-test[:,n-1])**2)
-		y_train = histogram_predict(train[:,:n-1],phi,predictor)
-		train_errs[i] = np.mean((y_train-train[:,n-1])**2)
-		print "train error: %f, test error: %f" %(train_errs[i], errs[i])
-	print "the average train error rate is: %f" %np.mean(train_errs)
-	print "the average test error rate is: %f" %np.mean(errs)
+		errors = er.error_rates(y_test,test[:,n-1])
+		err_rates[i] = errors
+		print errors
+		
+	print "the average test error rate is:" 
+	print np.mean(err_rates,axis=0)
 	print "============================================="
 
 if __name__ == "__main__":
@@ -115,6 +113,6 @@ if __name__ == "__main__":
 	spambase = np.loadtxt("../dataset/spambase/spambase.data", delimiter=",")
 	np.random.shuffle(spambase)
 
-	navie_bayes_histogram(spambase,2)
+	navie_bayes_histogram(spambase,9)
 
 	
