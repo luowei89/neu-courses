@@ -86,7 +86,7 @@ def print_params(params):
 		print params['sigma'][i]
 		print "-----------------"
 		print "# points:"
-		print np.sum(params['z'],axis=0)[i]	
+		print int(np.sum(params['z'],axis=0)[i])
 		print "-----------------"	
 
 if __name__ == "__main__":

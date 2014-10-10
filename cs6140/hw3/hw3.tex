@@ -1,6 +1,7 @@
 \documentclass[11pt,a4paper,fleqn]{article}
 \usepackage[margin=1in]{geometry}
 \usepackage{graphicx} 
+\usepackage{pdfpages}
 \begin{document}
 \begin{center}
 \textbf{CS6140 Machine Learning Fall 2014 Homework 3, Wei Luo }\\
@@ -132,4 +133,27 @@ average&0.02567962&0.3549987&0.15606102\\
 \\
 The ROC curves and AUC for each classifier is:\\
 \includegraphics[scale=0.75]{ROC_Naive_Bayes.png}\\
- \end{document}
+\includepdf[pages={1,2}]{102-scan.pdf}
+\newpage \noindent 
+\textbf{PROBLEM 4}\\
+\textbf{A)} The results for 2 gaussian:\\
+\indent $\mathbf{Gaussian_1}$: points: 1981; mean: [2.94846981, 3.0421113]\\
+\indent covariance: [[0.8992528, 0.01219505], [0.01219505, 2.96950283]] \\
+\indent $\mathbf{Gaussian_2}$: points: 4019; mean: [7.0078808, 3.98162176]\\
+\indent covariance: [[0.95936573, 0.4865028], [0.4865028, 0.99568567]] \\
+\textbf{B)} The results for 3 gaussian:\\
+\indent $\mathbf{Gaussian_1}$: points: 3098; mean: [6.98857865, 4.03307065]\\
+\indent covariance: [[1.00480526, 0.49076192], [0.49076192, 1.0080817]] \\
+\indent $\mathbf{Gaussian_2}$: points: 1945; mean: [2.91656552, 2.8932281]\\
+\indent covariance: [[0.86404608, -0.20507606], [-0.20507606, 2.9738529]] \\
+\indent $\mathbf{Gaussian_3}$: points: 4957; mean: [4.99043274, 7.03134783]\\
+\indent covariance: [[0.91578388, 0.18253052], [0.18253052, 0.90038684]] \\
+\\
+\\
+\textbf{PROBLEM 5}\\
+\textbf{a)}
+$$\frac{P(B|A,C)P(A|C)}{P(B|C)}=\frac{P(A,B,C)/P(A,C)*P(A,C)/P(C)}{P(B,C)/P(C)}=\frac{P(A,B,C)}{P(B,C)}=P(A|B,C)$$
+\textbf{b)}
+The prior probability of the coin being fair is $P(F)=\frac{F}{F+1}$. So the prior probability of the coin being double-headed is $P(D) = 1 - P(F) = \frac{1}{F+1}$. If we see $n$ heads in a row, the probability that the coon is fair is: $P(F|nH) = \frac{P(nH|F)P(F)}{P(nH)}$;  the probability that the coon is fair is: $P(D|nH) = \frac{P(nH|D)P(D)}{P(nH)}$. If the coin is fair, the probability of seeing a head is $P(H|F) = \frac{1}{2}$. the probability of seeing $n$ heads in a row is $P(nH|F) = P(H|F)^n = (\frac{1}{2})^n$. If the coin is double-headed, the probability of seeing a head and $n$ head in a row is $P(H|D)=P(nH|D)=1$. We want a better than even chance that the coin is double-headed, which means $P(D|nH)>P(F|nH)$. So $\frac{P(nH|D)P(D)}{P(nH)}>\frac{P(nH|F)P(F)}{P(nH)}$. So $1*\frac{1}{F+1}>(\frac{1}{2})^n*\frac{F}{F+1}$.\\
+We get $n > \log_2F$. So we need to see more than  $\log_2F$ heads in a row to become convinced that there is a better than even chance that the coin is double-headed.\\
+\end{document}
