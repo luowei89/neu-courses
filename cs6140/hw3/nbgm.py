@@ -45,8 +45,10 @@ def gaussians_log_pdf(x,params):
 	pi = params['pi']
 	mu = np.hstack(np.array(params['mu']))
 	sigma = np.hstack(np.vstack(params['sigma']))
-	i = np.argmax(pi)
-	log_pdf_x = -0.5*np.log(2*np.pi*sigma[i])-0.5*(x-mu[i])**2/sigma[i]
+	log_pdfs = np.zeros(len(pi))
+	for i in range(len(pi)):
+		log_pdfs[i] = np.log(pi[i])-0.5*np.log(2*np.pi*sigma[i])-0.5*(x-mu[i])**2/sigma[i]
+	log_pdf_x = np.max(log_pdfs)
 	return log_pdf_x if log_pdf_x < 0 else 0 # when pdf > 1 set it to 1
 
 def plotROC(log_prob_diffs,labels,print_type):
@@ -78,7 +80,7 @@ def k_folds(spambase,k_gaussians):
 	print "============================================="
 	print "Naive Bayes Classifier with Gaussian Mixtures"
 	print "(%d folds cross-validation...)" %K_FOLDS
-	for i in range(1):
+	for i in range(K_FOLDS):
 		print "iteration %d..." %i
 		test = k_folds[i]
 		train = np.vstack(np.delete(k_folds, i, axis=0))
@@ -89,6 +91,7 @@ def k_folds(spambase,k_gaussians):
 		print "error rate is: %f" %err_rates[i]
 		if i == 0:
 			plotROC(log_odds,test[:,n-1],"%d Gaussians" %k_gaussians)
+			plt.savefig("ROC_Gaussian_Mixtures_%d.png" %k_gaussians)
 	
 	print "the average test error rate is:" 
 	print np.mean(err_rates)
