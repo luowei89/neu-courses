@@ -91,7 +91,6 @@ def k_folds(spambase,k_gaussians):
 		print "error rate is: %f" %err_rates[i]
 		if i == 0:
 			plotROC(log_odds,test[:,n-1],"%d Gaussians" %k_gaussians)
-			plt.savefig("ROC_Gaussian_Mixtures_%d.png" %k_gaussians)
 	
 	print "the average test error rate is:" 
 	print np.mean(err_rates)

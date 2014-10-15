@@ -133,6 +133,9 @@ average&0.02567962&0.3549987&0.15606102\\
 \\
 The ROC curves and AUC for each classifier is:\\
 \includegraphics[scale=0.75]{ROC_Naive_Bayes.png}\\
+\\ \\ \\ \\ \\ \\ \\ \\
+\textbf{PROBLEM 3}\\
+(next page)
 \includepdf[pages={1,2}]{102-scan.pdf}
 \newpage \noindent 
 \textbf{PROBLEM 4}\\
@@ -156,4 +159,65 @@ $$\frac{P(B|A,C)P(A|C)}{P(B|C)}=\frac{P(A,B,C)/P(A,C)*P(A,C)/P(C)}{P(B,C)/P(C)}=
 \textbf{b)}
 The prior probability of the coin being fair is $P(F)=\frac{F}{F+1}$. So the prior probability of the coin being double-headed is $P(D) = 1 - P(F) = \frac{1}{F+1}$. If we see $n$ heads in a row, the probability that the coon is fair is: $P(F|nH) = \frac{P(nH|F)P(F)}{P(nH)}$;  the probability that the coon is fair is: $P(D|nH) = \frac{P(nH|D)P(D)}{P(nH)}$. If the coin is fair, the probability of seeing a head is $P(H|F) = \frac{1}{2}$. the probability of seeing $n$ heads in a row is $P(nH|F) = P(H|F)^n = (\frac{1}{2})^n$. If the coin is double-headed, the probability of seeing a head and $n$ head in a row is $P(H|D)=P(nH|D)=1$. We want a better than even chance that the coin is double-headed, which means $P(D|nH)>P(F|nH)$. So $\frac{P(nH|D)P(D)}{P(nH)}>\frac{P(nH|F)P(F)}{P(nH)}$. So $1*\frac{1}{F+1}>(\frac{1}{2})^n*\frac{F}{F+1}$.\\
 We get $n > \log_2F$. So we need to see more than  $\log_2F$ heads in a row to become convinced that there is a better than even chance that the coin is double-headed.\\
+\\
+\\
+\textbf{PROBLEM 6}\\
+Flip different number of coins with different probabilities. Then run em algorithm:\\ \\
+\begin{tabular}{|c|ll|}
+\hline
+$\pi$&0.8&0.2\\
+$em\_\pi$&0.84163594&0.15836406\\
+\hline
+probs&0.75&0.4\\
+em\_probs&0.74193735&0.386823\\
+\hline
+\end{tabular}\\ \\ \\
+\begin{tabular}{|c|ll|}
+\hline
+$\pi$&0.4&0.6\\
+$em\_\pi$&0.41665103&0.58334897\\
+\hline
+probs&0.9&0.2\\
+em\_probs&0.89850985&0.19634036\\
+\hline
+\end{tabular}\\ \\ \\
+\begin{tabular}{|c|ll|}
+\hline
+$\pi$&0.1&0.9\\
+$em\_\pi$&0.29550855&0.70449145\\
+\hline
+probs&0.45&0.51\\
+em\_probs&0.45889733&0.51653134\\
+\hline
+\end{tabular}\\
+\begin{tabular}{|c|lll|}
+\hline
+$\pi$&0.2&0.3&0.5\\
+$em\_\pi$&0.19472662&0.31741561&0.48785777\\
+\hline
+probs&0.99&0.47&0.08\\
+em\_probs&0.99373054&0.48164992&0.07176479\\
+\hline
+\end{tabular}\\ \\ \\
+\begin{tabular}{|c|lllll|}
+\hline
+$\pi$&0.1&0.1&0.2&0.3&0.3\\
+$em\_\pi$&0.13627108&0.0884572&0.11475013&0.3240638&0.33645778\\
+\hline
+probs&0.98&0.69&0.38&0.21&0.03\\
+em\_probs&0.97007034&0.64665238&0.30068529&0.28223276&0.03697732\\
+\hline
+\end{tabular}\\ \\ \\
+\\
+\textbf{PROBLEM 7}\\
+Tried with K = \{1,2,4,9\}. The average error rates are as follows:\\
+\begin{tabular}{|c|c|c|c|c|}
+\hline
+K&1&2&4&9\\
+\hline
+Error Rate&0.132321&0.130152&0.097614&0.091106\\
+\hline
+\end{tabular}\\ \\
+And the ROC curve for each K is:\\
+\includegraphics[scale=0.75]{ROC_Gaussian_Mixtures.png}\\
 \end{document}
