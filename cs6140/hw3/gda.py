@@ -16,19 +16,19 @@ def gda_learn(D):
 	cov_m = np.cov(X.T)
 	return phi,mu0,mu1,cov_m
 
-def gda_pridect(X,mu0,mu1,cov_m):
-	m_det = np.linalg.det(cov_m)
+def gda_pridect(X,mu0,mu1,phi,cov_m):
+	#m_det = np.linalg.det(cov_m)
 	m_inv = np.linalg.pinv(cov_m)
-	return [gda_pridect_single(x,mu0,mu1,m_det,m_inv) for x in X]
+	return [gda_pridect_single(x,mu0,mu1,phi,m_inv) for x in X]
 
-def gda_pridect_single(x,mu0,mu1,m_det,m_inv):
-	p0 = prob(x,mu0,m_det,m_inv)
-	p1 = prob(x,mu1,m_det,m_inv)
+def gda_pridect_single(x,mu0,mu1,phi,m_inv):
+	p0 = prob(x,mu0,(1-phi),m_inv)
+	p1 = prob(x,mu1,phi,m_inv)
 	return 1 if p1 > p0 else 0
 
-def prob(x,mu,m_det,m_inv):
+def prob(x,mu,phi,m_inv):
 	diff_m = np.matrix(x-mu)
-	return np.exp(-0.5*np.dot(np.dot(diff_m,m_inv),diff_m.T))/np.sqrt(2*np.pi*m_det)
+	return np.exp(-0.5*np.dot(np.dot(diff_m,m_inv),diff_m.T))*phi#/np.sqrt(2*np.pi*m_det)
 
 if __name__ == "__main__":
 	print "============================================="
@@ -50,9 +50,9 @@ if __name__ == "__main__":
 		train = np.vstack(np.delete(k_folds, i, axis=0))
 
 		phi,mu0,mu1,cov_m = gda_learn(train)
-		y_test = gda_pridect(test[:,:n-1],mu0,mu1,cov_m)
+		y_test = gda_pridect(test[:,:n-1],mu0,mu1,phi,cov_m)
 		errs[i] = np.mean((y_test-test[:,n-1])**2)
-		y_train = gda_pridect(train[:,:n-1],mu0,mu1,cov_m)
+		y_train = gda_pridect(train[:,:n-1],mu0,mu1,phi,cov_m)
 		train_errs[i] = np.mean((y_train-train[:,n-1])**2)
 		print "train error: %f, test error: %f" %(train_errs[i], errs[i])
 	print "the average train error rate is: %f" %np.mean(train_errs)

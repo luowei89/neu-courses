@@ -5,18 +5,18 @@ import numpy as np
 import copy
 
 MAX_ITER = 500
-TOL = 10**(-2)
+TOL = 1e-2
+
 def emgm(X,k):
 	params = init(X,k)
 	for i in range(MAX_ITER):
-		print "iteration %d..." %i
+		# print "iteration %d..." %i
 		old_p = copy.deepcopy(params)
 		params = expectation(X,params)
 		params = maximization(X,params)
 		if converge(old_p,params):
 			print "converge at iteration %d" %i
 			break
-		np.sum(params['z'],axis=0)
 	return params
 
 def converge(old,new):
@@ -34,7 +34,7 @@ def init(X,k):
 	params['sigma'] = np.ones((k,d,d))
 	for i in range(k):
 		rand_inx = np.random.randint(m,size=20)
-		params['sigma'][i] = np.cov(X[rand_inx].T)
+		params['sigma'][i] = np.cov(X[rand_inx].T) + np.identity(d)*1e-6
 	params['z'] = np.zeros((m,k))	
 	for i in range(m):
 		index = int(np.random.rand()*k)
@@ -48,10 +48,12 @@ def expectation(X,params):
 	sigma = params['sigma']
 	m,d = X.shape
 	n = len(mu)
+	sigma_inv = [np.linalg.pinv(sigma_j) for sigma_j in sigma]
+	sigma_det = [np.linalg.det(sigma_j) for sigma_j in sigma]
 	for i in range(m):
 		for j in range(n):
-			exp = -0.5*np.dot(np.dot((X[i]-mu[j]),np.linalg.pinv(sigma[j])),(X[i]-mu[j]))
-			params['z'][i][j] = (2*np.pi)**(-d/2)*np.linalg.det(sigma[j])**(-1/2)*np.exp(exp)
+			exp = -0.5*np.dot(np.dot((X[i]-mu[j]),sigma_inv[j]),(X[i]-mu[j]))
+			params['z'][i][j] = (2*np.pi)**(-d/2)*sigma_det[j]**(-1/2)*np.exp(exp)
 		params['z'][i] = params['z'][i] == np.max(params['z'][i])
 	return params
 
@@ -68,8 +70,9 @@ def maximization(X,params):
 			sigma += z[j][i]*np.dot(np.matrix(X[j]-params['mu'][i]).T,np.matrix(X[j]-params['mu'][i]))
 			mu += z[j][i]*X[j]
 			pi += z[j][i]
-		params['sigma'][i] = sigma/pi
-		params['mu'][i] = mu/pi
+		if pi != 0:
+			params['sigma'][i] = sigma/pi + np.identity(d)*1e-6
+			params['mu'][i] = mu/pi
 		params['pi'][i] = pi/m
 	return params
 
