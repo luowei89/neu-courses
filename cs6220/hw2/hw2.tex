@@ -1,6 +1,11 @@
 \documentclass[11pt,a4paper,fleqn]{article}
 \usepackage[margin=1in]{geometry}
-\usepackage{graphicx} 
+\usepackage{graphicx}
+\usepackage{subcaption}
+\makeatletter
+\setlength{\@fptop}{0pt}
+\setlength{\@fpbot}{0pt plus 1fil}
+\makeatother
 \begin{document}
 \begin{center}
 \textbf{CS6220 Data Mining Fall 2014 Homework 2, Wei Luo}\\
@@ -24,8 +29,63 @@ recall: $R = \frac{TP}{TP+FN} = \frac{29}{29+11} = 0.725$\\
 F-measure: $F_1=\frac{2PR}{P+R} = \frac{2*0.6744*0.725}{0.6744+0.725} = 0.6988$\\
 For clusters $C$ and ground true labels $\Omega$:\\
 $I(\Omega,C) = \frac{1}{20}\log\frac{20*1}{5*6}+\frac{4}{20}\log\frac{20*4}{5*5}+\frac{5}{20}\log\frac{20*5}{5*6}+\frac{5}{20}\log\frac{20*5}{5*6}$\\
-\indent \indent \indent $+\frac{1}{20}\log\frac{20*1}{5*6}+\frac{1}{20}\log\frac{20*1}{5*5}+\frac{3}{20}\log\frac{20*3}{5*3}=4.2753$\\
+\indent \indent \indent $+\frac{1}{20}\log\frac{20*1}{5*6}+\frac{1}{20}\log\frac{20*1}{5*5}+\frac{3}{20}\log\frac{20*3}{5*3}=0.9909$\\
 $H(\Omega) = -(\frac{5}{20}\log\frac{5}{20} +  \frac{5}{20}\log\frac{5}{20} + \frac{5}{20}\log\frac{5}{20}  + \frac{5}{20}\log\frac{5}{20}) = 1.3863$\\
 $H(C) = -(\frac{6}{20}\log\frac{6}{20} +  \frac{6}{20}\log\frac{6}{20} + \frac{5}{20}\log\frac{5}{20}  + \frac{3}{20}\log\frac{3}{20}) = 1.3535$\\
-Normalized Mutual Information: $NMI(\Omega,C) = \frac{I(\Omega,C)}{\sqrt{H(\Omega)H(C)}}= 3.1211$\\
+Normalized Mutual Information: $NMI(\Omega,C) = \frac{I(\Omega,C)}{\sqrt{H(\Omega)H(C)}}= 0.7234$\\ \\ \\
+\textbf{2. Understanding and comparing different clustering algorithms.}\\ \\
+(1) run the code with commands like:\\
+$>$ python k\_means.py dataset1.txt\\
+$>$ python emp.y dataset2.txt\\
+$>$ python dbscan.py dataset3.txt 0.3 10\\
+Where the first parameter (dataset*.txt) is the file name of the dataset. For DBSCAN, the second parameter is $eps$, the third parameter is $minPts$\\
+(2) The purity and NMI of each algorithm for each dataset is:\\ \\
+\begin{tabular}{|c|l|l|l|l|}
+\hline
+&&dataset1.txt&dataset2.txt&dataset3.txt\\
+\hline
+K-means&Purity&1.000000&0.965000&0.820000\\
+ &NMI&1.000000&0.869672&0.319923\\
+\hline
+DBSCAN&Purity&1.000000&0.965000&1.000000\\
+ &NMI&1.000000&0.922051&1.000000\\
+\hline
+EM&Purity&1.000000&1.000000&0.880000\\
+ &NMI&1.000000&1.000000&0.472501\\
+\hline
+\end{tabular}\\ \\
+In DBSCAN algorithm, I used\\
+$eps = 0.7, minPts = 15$ for dataset1\\
+$eps = 0.9, minPts = 5$ for dataset2\\
+$eps = 0.3, minPts = 10$ for dataset3\\ \\
+The cluster result as scatter plot is:\\
+\begin{figure}[t!]
+\begin{subfigure}{.3\textwidth}
+\includegraphics[width=\linewidth]{K-means1.png}
+\end{subfigure}
+\begin{subfigure}{.3\textwidth}
+\includegraphics[width=\linewidth]{K-means2.png}
+\end{subfigure}
+\begin{subfigure}{.3\textwidth}
+\includegraphics[width=\linewidth]{K-means3.png}
+\end{subfigure}\\
+\begin{subfigure}{.3\textwidth}
+\includegraphics[width=\linewidth]{DBSCAN1.png}
+\end{subfigure}
+\begin{subfigure}{.3\textwidth}
+\includegraphics[width=\linewidth]{DBSCAN2.png}
+\end{subfigure}
+\begin{subfigure}{.3\textwidth}
+\includegraphics[width=\linewidth]{DBSCAN3.png}
+\end{subfigure}\\
+\begin{subfigure}{.3\textwidth}
+\includegraphics[width=\linewidth]{EM1.png}
+\end{subfigure}
+\begin{subfigure}{.3\textwidth}
+\includegraphics[width=\linewidth]{EM2.png}
+\end{subfigure}
+\begin{subfigure}{.3\textwidth}
+\includegraphics[width=\linewidth]{EM3.png}
+\end{subfigure}
+\end{figure}
 \end{document}
