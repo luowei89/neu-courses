@@ -36,7 +36,7 @@ Normalized Mutual Information: $NMI(\Omega,C) = \frac{I(\Omega,C)}{\sqrt{H(\Omeg
 \textbf{2. Understanding and comparing different clustering algorithms.}\\ \\
 (1) run the code with commands like:\\
 $>$ python k\_means.py dataset1.txt\\
-$>$ python emp.y dataset2.txt\\
+$>$ python em.py dataset2.txt\\
 $>$ python dbscan.py dataset3.txt 0.3 10\\
 Where the first parameter (dataset*.txt) is the file name of the dataset. For DBSCAN, the second parameter is $eps$, the third parameter is $minPts$\\
 (2) The purity and NMI of each algorithm for each dataset is:\\ \\
@@ -87,5 +87,16 @@ The cluster result as scatter plot is:\\
 \begin{subfigure}{.3\textwidth}
 \includegraphics[width=\linewidth]{EM3.png}
 \end{subfigure}
-\end{figure}
+\end{figure}\\ \\ \\ \\
+(3) For dataset1, all three algorithm successfully clustered the clusters with 100\% accuracy. Because the datapoints are very well separated, all algorithms can do the job well.\\
+For dataset2, the EM algorithm works better, because although the clusters are linearly separable, they have different shapes. The cluster on the left has much bigger range area and data points are sparse distributed. This will prevent K-means algorithm working well where each cluster should have almost same size. Also, this will introduce noise in DBSCAN algorithm. But for EM with gaussian mixtures, the gaussians can have different shape which can make a perfect fit to dataset2 clusters.\\
+For dataset3, the clusters are not linearly separable, which makes the result of K-means and EM algorithms hard to do the clustering. But the data points are densely distributed. This makes DBSCAN algorithm works better than the other two algorithms.\\ \\
+\textbf{3. Clustering the real-world data.}\\
+(1) Major steps: \\
+1. By looking into the data, find out the top 10\% authors who have most contributions in the 20 conferences. (Have most publications in those conferences.)\\
+2. Feature selection: take the count of each top 10\% authors' publications in each conference as features. The number of features is the number of authors who have top 10\% contributions among conferences.\\
+3. Clustering criterion: for the $N$ features, we look into the $N$ dimensional space, among the 20 data points, the ones that are closer to each other should be considered as in same cluster.\\
+4. Algorithm to use: choose the K-means algorithm with $k=4$ to do the clustering.\\
+(2) Purity is 0.750000; NMI is 0.340576.\\
+(3) By assuming that the authors are more likely to focus on similar topics and publish their publications to similar conferences, this method is reasonable. However, looking at the result, this method can only get a fair purity and low NMI. This indicates that the previous assumption may not stand.
 \end{document}
