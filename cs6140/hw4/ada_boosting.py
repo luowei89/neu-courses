@@ -2,7 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 K = 10
-MAX_T = 500
+MAX_T = 200
 
 def decision_stupms(D):
 	stumps = {}
@@ -64,7 +64,7 @@ def tpr_fpr(y,labels):
 	fp = np.sum(np.logical_and(y,np.logical_not(labels)))
 	p = np.sum(labels)
 	n = len(labels) - p
-	return tp/float(p),fp/float(n)
+	return 0 if p == 0 else tp/float(p),0 if n == 0 else fp/float(n)
 
 def auc(xs,ys):
 	X = np.vstack((xs,ys))
@@ -85,7 +85,7 @@ def plot_ROC(xs,ys,auc,title):
 	plt.xlabel("False Positive Rate")
 	plt.savefig("ROC_AdaBoosting_%s.png" %title)
 
-def ada_boosting(D,test,weak_learner_fun,title):
+def ada_boosting(D,test,weak_learner_fun=weak_learner_optimal,title="Optimal"):
 	m,d = D.shape
 	distribution = np.ones(m)/float(m)
 	stumps = decision_stupms(D)
@@ -94,7 +94,7 @@ def ada_boosting(D,test,weak_learner_fun,title):
 	train_y = D[:,d-1]
 	test_X = test[:,:d-1]
 	test_y = test[:,d-1]
-	old_auc = 0
+	old_auc,old_err = 0,0
 	for i in range(MAX_T):
 		feat,thresh,round_err = weak_learner_fun(stumps,distribution)
 		alpha = 0.5*np.log((1-round_err)/round_err)
@@ -102,29 +102,33 @@ def ada_boosting(D,test,weak_learner_fun,title):
 		distribution = distribution*np.exp(-1*alpha*yhs)
 		distribution = distribution/np.sum(distribution)
 		weighed_weak_learners.append((alpha,feat,thresh))
+		#print "round %d, feat %d, thresh %0.4f, roundErr %0.4f" %(i,feat,thresh,round_err)
+		train_err = 0
 		train_err = error_rate(ada_predict(train_X,weighed_weak_learners),train_y)
 		test_err = error_rate(ada_predict(test_X,weighed_weak_learners),test_y)
 		t,f = tprs_fprs(test_X,test_y,weighed_weak_learners)
 		test_auc = auc(f,t)
 		print "round %d, feat %d, thresh %0.4f, roundErr %0.4f, trainErr %0.4f, testErr %0.4f, auc %0.4f" %(i,feat,thresh,round_err,train_err,test_err,test_auc)
-		if test_auc == old_auc:
-			break
-		old_auc = test_auc
-	plot_ROC(f,t,test_auc,title)
+		if test_auc == old_auc and test_err == old_err:
+		#if abs(test_auc - old_auc)<1e-4 and abs(test_err - old_err)<1e-4: # loose condition
+		#if (abs(round_err-0.5) < 2e-2 and train_err == old_err) or train_err == 0:
+		#if train_err == 0:
+			break # converge
+		#old_auc,old_err = test_auc,test_err
+	#plot_ROC(f,t,test_auc,title) # for problem 1, won't plot for other problems
 	return weighed_weak_learners
-
 
 if __name__ == '__main__':
 	print "============================================="
 	print "loading spambase data..."
 	spambase = np.loadtxt("../dataset/spambase/spambase.data", delimiter=",")
-	print "============================================="
 	np.random.shuffle(spambase)
+	print "============================================="
 	k_folds = np.array_split(spambase,K)
 	i = int(np.random.rand()*K)
 	print "================================Optimal Weak Learner======================================="
 	test = k_folds[i]
 	train = np.vstack(np.delete(k_folds, i, axis=0))
-	ada_boosting(train,test,weak_learner_optimal,"Optimal")
-	print "================================Random Weak Learner=======+================================"
+	ada_boosting(train,test)
+	print "================================Random Weak Learner========================================"
 	ada_boosting(train,test,weak_learner_random,"Random")
