@@ -11,7 +11,7 @@ def bagging(train):
 		s = time.time()
 		train_i = train[np.random.randint(N, size=N)]
 		dts[i] = cart.fitTree(node.Node(),train_i,0,False,5)
-		print "decision tree %d, time %f" %(i,time.time()-s)
+		print "decision tree %d, time %fs" %(i,time.time()-s)
 	return dts
 
 def bagging_predict(test,dts):

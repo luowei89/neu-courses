@@ -87,7 +87,7 @@ def ecoc(train,test,num_classes):
 		train[:,d-1] = [codes[y,i] for y in train_y]
 		test[:,d-1] = [codes[y,i] for y in test_y]
 		#predictors[i] = ab.ada_boosting(train,test)
-		#print "function %d, %f" %(i,time.time()-s)
+		#print "function %d, time %fs" %(i,time.time()-s)
 		t = threading.Thread(target=multi_thread_boosting, args=(train,test,i,predictors))
 		threads.append(t)
 		t.start()
@@ -102,7 +102,7 @@ def ecoc(train,test,num_classes):
 def multi_thread_boosting(train,test,i,result):
 	s = time.time()
 	result[i] = ab.ada_boosting(train,test)
-	print "function %d, %f" %(i,time.time()-s)
+	print "function %d, time %fs" %(i,time.time()-s)
 
 def ecoc_accuracy(predicted,y):
 	return np.sum(predicted==y)/float(len(y))
