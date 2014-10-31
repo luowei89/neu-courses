@@ -19,10 +19,10 @@ def bagging_predict(test,dts):
 	N,d = test.shape
 	ys = np.zeros((len(dts),N))
 	for ti in dts:
-		ys[ti] = cart.predict(test[:,:d-1],dts[ti])#dts[ti].predict(test[:,:d-1])
+		ys[ti] = cart.predict(test[:,:d-1],dts[ti])
 		print "decision tree %d, err %f" %(ti,np.sum(np.logical_xor(ys[ti],test[:,d-1]))/float(N))
 	y = np.mean(ys,axis=0)
-	return y > 0.5
+	return y >= 0.5
 
 if __name__ == '__main__':
 	print "============================================="
