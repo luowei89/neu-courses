@@ -1,6 +1,5 @@
 import numpy as np
 import ada_boosting as ab
-import threading
 import time
 
 def load_data(data_name):
@@ -50,9 +49,7 @@ def exhaustive_codes(num):
 def reduce_codes(codes,size):
 	n,f = codes.shape
 	rand_idx = np.random.randint(f,size=size)
-
 	return codes[:,rand_idx]
-
 
 def ecoc_predict(test_X,predictors,codes):
 	nc = len(predictors)
@@ -66,7 +63,7 @@ def ecoc_predict(test_X,predictors,codes):
 def min_distance(a,item):
 	dist = np.inf
 	min_i = -1
-	for i in len(a):
+	for i in range(len(a)):
 		dist_i = np.sum(abs(a[i] - item))
 		if dist_i < dist:
 			dist = dist_i
@@ -75,7 +72,7 @@ def min_distance(a,item):
 
 def ecoc(train,test,num_classes):
 	codes = exhaustive_codes(num_classes)
-	#codes = reduce_codes(codes,20)
+	codes = reduce_codes(codes,20)
 	funs = codes.shape[1]
 	m,d = train.shape
 	train_y = np.copy(train[:,d-1])
@@ -83,36 +80,24 @@ def ecoc(train,test,num_classes):
 	predictors = {}
 	threads = []
 	for i in range(funs):
-		#s = time.time()
+		s = time.time()
 		train[:,d-1] = [codes[y,i] for y in train_y]
 		test[:,d-1] = [codes[y,i] for y in test_y]
-		#predictors[i] = ab.ada_boosting(train,test)
-		#print "function %d, time %fs" %(i,time.time()-s)
-		t = threading.Thread(target=multi_thread_boosting, args=(train,test,i,predictors))
-		threads.append(t)
-		t.start()
-		if len(threads) >= 2:
-			for t in threads:
-				t.join()
-			threads = []
-	for t in threads:
-		t.join()
+		predictors[i] = ab.ada_boosting(train,test)
+		print "function %d, time %fs" %(i,time.time()-s)
 	print ecoc_accuracy(ecoc_predict(test[:,:d-1],predictors,codes),test_y)
-
-def multi_thread_boosting(train,test,i,result):
-	s = time.time()
-	result[i] = ab.ada_boosting(train,test)
-	print "function %d, time %fs" %(i,time.time()-s)
 
 def ecoc_accuracy(predicted,y):
 	return np.sum(predicted==y)/float(len(y))
 
 if __name__ == '__main__':
+	
 	train = load_data("train")
 	test = load_data("test")
 	ecoc(train,test,8)
 	"""
 	codes = exhaustive_codes(8)
+	print codes
 	codes = reduce_codes(codes,20)
 	for i in range(len(codes)):
 		for j in range(i+1,len(codes)):

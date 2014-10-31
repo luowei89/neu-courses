@@ -4,6 +4,8 @@ import matplotlib.pyplot as plt
 K = 10
 MAX_T = 200
 
+legends = []
+
 def decision_stupms(D):
 	stumps = {}
 	m,d = D.shape
@@ -110,11 +112,14 @@ def ada_boosting(D,test,weak_learner_fun=weak_learner_optimal,title="Optimal"):
 		test_auc = auc(f,t)
 		print "round %d, feat %d, thresh %0.4f, roundErr %0.4f, trainErr %0.4f, testErr %0.4f, auc %0.4f" %(i,feat,thresh,round_err,train_err,test_err,test_auc)
 		if test_auc == old_auc and test_err == old_err:
-		#if abs(test_auc - old_auc)<1e-4 and abs(test_err - old_err)<1e-4: # loose condition
-		#if (abs(round_err-0.5) < 2e-2 and train_err == old_err) or train_err == 0:
-		#if train_err == 0:
 			break # converge
-		#old_auc,old_err = test_auc,test_err
+		#if abs(test_auc - old_auc)<1e-4 and abs(test_err - old_err)<1e-4: # loose condition
+		if title=="Optimal":
+			if abs(round_err-0.5) < 2e-2 or train_err == 0:
+				break 
+		old_auc,old_err = test_auc,test_err
+	#plt.plot(f, t)
+	#legends.append("%s, AUC: %0.4f" %(title,test_auc))
 	#plot_ROC(f,t,test_auc,title) # for problem 1, won't plot for other problems
 	return weighed_weak_learners
 
@@ -126,9 +131,16 @@ if __name__ == '__main__':
 	print "============================================="
 	k_folds = np.array_split(spambase,K)
 	i = int(np.random.rand()*K)
+	plt.clf()
+	plt.axis([0, 1, 0, 1])
+	plt.title("ROC curves for AdaBoosting")
+	plt.ylabel("True Positive Rate")
+	plt.xlabel("False Positive Rate")
 	print "================================Optimal Weak Learner======================================="
 	test = k_folds[i]
 	train = np.vstack(np.delete(k_folds, i, axis=0))
 	ada_boosting(train,test)
 	print "================================Random Weak Learner========================================"
-	ada_boosting(train,test,weak_learner_random,"Random")
+	ada_boosting(train,test,weak_learner_random,"Randomly Chosen")
+	plt.legend(legends, loc='lower right')
+	plt.savefig("p1_roc.png")

@@ -69,6 +69,6 @@ if __name__ == '__main__':
 	spambase = np.loadtxt("../dataset/spambase/spambase.data", delimiter=",")
 	np.random.shuffle(spambase)
 	print "============================================="
-	active_learning(spambase,"spambase",5)
-	active_learning_uci("crx",2)
+	active_learning(spambase,"spambase",2)
+	#active_learning_uci("crx",2)
 	

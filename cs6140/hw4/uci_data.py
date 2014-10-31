@@ -3,6 +3,8 @@ import ada_boosting as ab
 import matplotlib.pyplot as plt
 K = 10
 
+legends = []
+
 def data_path(data_set):
 	return "../dataset/%s/%s.data" %(data_set,data_set),"../dataset/%s/%s.config" %(data_set,data_set)
 
@@ -63,15 +65,21 @@ def train_with_sample(data_set):
 		print "================================================================================"
 		print "Accuracy with %d%% samples (%s) is %f." %(c,data_set,1-err)
 		errs.append(err)
-	plt.clf()
+	
 	plt.plot(c_values,errs)
-	plt.savefig("p2_err.png")
+	legends.append(data_set)
 
 if __name__ == '__main__':
 	#binary_label_datasets = ["crx","vote","band","agr","monk","tic"]
 	#for ds in binary_label_datasets:
 	#	k_folds_test(ds)
-	k_folds_test("crx")
-	k_folds_test("vote")
+	#k_folds_test("crx")
+	#k_folds_test("vote")
+	plt.clf()
+	plt.title("Error rates with c%s randomly chosen train set with uci datasets." %'%')
+	plt.ylabel("Test Error")
+	plt.xlabel("c%s datapoints" %'%')
 	train_with_sample("crx")
 	train_with_sample("vote")
+	plt.legend(legends, loc='upper right')
+	plt.savefig("p2_errs.png")

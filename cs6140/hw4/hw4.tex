@@ -1,0 +1,29 @@
+\documentclass[11pt,a4paper,fleqn]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{graphicx} 
+\usepackage{pdfpages}
+\begin{document}
+\begin{center}
+\textbf{CS6140 Machine Learning Fall 2014 Homework 4, Wei Luo }\\
+\end{center}
+\textbf{PROBLEM 1}\\
+\\
+Weak Learning via "Optimal" Decision Stumps: accuracy is 0.9609\\
+Weak Learning via "Randomly Chosen" Decision Stumps: accuracy is 0.9370\\
+The ROC curves for these result:\\
+\includegraphics[scale=0.5]{p1_roc.png}\\
+\textbf{PROBLEM 2}\\
+\\
+Run adaboosting with 10 folds cross validation on crx dataset, average accuracy is 0.866923\\
+Run adaboosting with 10 folds cross validation on vote dataset, average accuracy is 0.961594\\
+Try adaboosting with different size of sample training dataset on crx and vote, err rates are:\\
+\includegraphics[scale=0.5]{p2_sample_errs.png}\\
+\newpage \noindent
+\textbf{PROBLEM 3}\\
+\\
+The results for active learning and randomly built on spambase dataset:\\
+\includegraphics[scale=0.6]{p3_spambase_2_err.png}\\
+\textbf{PROBLEM 4}\\
+\\
+Train the data with 20 random selected functions, 200 rounds for each adaboosting iteration, I obtained a result of accuracy 0.756107275624 .\\
+\end{document}
