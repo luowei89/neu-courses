@@ -1,5 +1,5 @@
 """
-Naive Bayes Classifier, Copied from hw3
+Naive Bayes Classifier, Copied and Modified from hw3
 """
 import numpy as np
 import matplotlib.pyplot as plt
@@ -31,18 +31,20 @@ def naive_bayes_learn(D,c_type,n_bins=4):
 
 def learn_berboulli(X0,X1):
 	params = {}
+	n = X0.shape[1]
 	params[0],params[1] = {},{}
-	params[0]["mu"] = np.mean(X0, axis=0)
-	params[1]["mu"] = np.mean(X1, axis=0)
+	params[0]["mu"] = [np.mean(X0[:,i][np.logical_not(np.isnan(X0[:,i]))]) for i in range(n)]
+	params[1]["mu"] = [np.mean(X1[:,i][np.logical_not(np.isnan(X1[:,i]))]) for i in range(n)]
 	params[0]["prob"] = laplace_prob_boolean(X0,params[0]["mu"])
 	params[1]["prob"] = laplace_prob_boolean(X1,params[1]["mu"])
 	return params
 
 def learn_gaussian(X0,X1,X):
 	params = {}
+	n = X0.shape[1]
 	params[0],params[1] = {},{}
-	params[0]["mu"] = np.mean(X0, axis=0)
-	params[1]["mu"] = np.mean(X1, axis=0)
+	params[0]["mu"] = [np.mean(X0[:,i][np.logical_not(np.isnan(X0[:,i]))]) for i in range(n)]
+	params[1]["mu"] = [np.mean(X1[:,i][np.logical_not(np.isnan(X1[:,i]))]) for i in range(n)]
 	params[0]["sigma"] = fore_back_variance(X0,X)
 	params[1]["sigma"] = fore_back_variance(X1,X)
 	return params
@@ -80,12 +82,14 @@ def laplace_prob_bins(x,thres):
 	return counts/float(len(x)+n_bins)
 
 def fore_back_variance(fX,bX):
-	foreground = np.var(fX, axis=0)
-	background = np.var(bX, axis=0)
+	n = fX.shape[1]
+	foreground = np.array([np.var(fX[:,i][np.logical_not(np.isnan(fX[:,i]))]) for i in range(n)])
+	background = np.array([np.var(bX[:,i][np.logical_not(np.isnan(bX[:,i]))]) for i in range(n)])
 	l = len(bX)/(len(bX)+2.0)
 	return l * foreground + (1 - l) * background
 
 def bucket(x,n):
+	x = x[np.logical_not(np.isnan(x[:]))]
 	if n == 2: # Bernoulli?
 		return np.array([-np.inf,np.mean(x),np.inf])
 	if n == 4:
@@ -137,14 +141,20 @@ def naive_bayes_prob(x,c_type,param):
 	return sum(log_probs)
 
 def bernoulli_log_prob(x,mu,prob):
+	if np.isnan(x):
+		return 0
 	prob_x = prob if x <= mu else (1-prob)
 	return np.log(prob_x)
 
 def gaussian_log_prob(x,mu,sigma):
+	if np.isnan(x):
+		return 0
 	log_pdf_x = -0.5*np.log(2*np.pi*sigma)-0.5*(x-mu)**2/sigma
 	return log_pdf_x if log_pdf_x < 0 else 0 # when pdf > 1 set it to 1
 
 def histogram_log_prob(x,predictor):
+	if np.isnan(x):
+		return 0
 	prob = 0
 	thres = predictor["thres"]
 	probs = predictor["probs"]
@@ -152,7 +162,7 @@ def histogram_log_prob(x,predictor):
 	for i in range(n_bins):
 		if x > thres[i] and x <= thres[i+1]:
 			prob = probs[i]
-	return np.log(prob)
+	return np.log(prob) if prob > 0 else 0
 
 def naive_bayes_k_folds(data,c_type,n_bins=4):
 	n = data.shape[1]

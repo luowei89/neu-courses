@@ -80,8 +80,11 @@ def random_rectangle():
 	return (lt_x,lt_y,rb_x,rb_y)
 
 def ecoc_image():
+	print "============================================="
+	print "loading image features..."
 	train = np.loadtxt("digits/train.txt")
 	test = np.loadtxt("digits/test.txt")
+	print "============================================="
 	ecoc(train,test,len(np.unique(test[:,test.shape[1]-1])))
 
 def exhaustive_codes(num):
@@ -95,6 +98,25 @@ def reduce_codes(codes,size):
 	rand_idx = random.sample(range(codes.shape[1]),size)
 	return codes[:,rand_idx]
 
+def ecoc_predict(test_X,predictors,codes):
+	nc = len(predictors)
+	m,d = test_X.shape
+	output_matrix = np.zeros((m,nc))
+	for i in range(nc):
+		output_matrix[:,i] = ab.ada_predict(test_X,predictors[i])
+	output_matrix = output_matrix/2.0 + 0.5
+	return np.array([min_distance(codes,om) for om in output_matrix])
+
+def min_distance(a,item):
+	dist = np.inf
+	min_i = -1
+	for i in range(len(a)):
+		dist_i = np.sum(abs(a[i] - item))
+		if dist_i < dist:
+			dist = dist_i
+			min_i = i
+	return min_i
+
 def ecoc(train,test,num_classes):
 	codes = exhaustive_codes(num_classes)
 	codes = reduce_codes(codes,20)
@@ -107,8 +129,10 @@ def ecoc(train,test,num_classes):
 		s = time.time()
 		train[:,d-1] = [codes[y,i] for y in train_y]
 		test[:,d-1] = [codes[y,i] for y in test_y]
-		predictors[i] = ab.ada_boosting(train,test)
+		predictors[i] = ab.ada_boosting(train)
 		print "function %d, time %fs" %(i,time.time()-s)
+	correct = np.sum(ecoc_predict(test[:,:d-1],predictors,codes)==test_y)
+	print "Accuracy is %f" %(correct/float(m))
 
 if __name__ == '__main__':
 	"step 1. read the file and store it as numpy txt"
