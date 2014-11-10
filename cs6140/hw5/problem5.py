@@ -119,7 +119,7 @@ def min_distance(a,item):
 
 def ecoc(train,test,num_classes):
 	codes = exhaustive_codes(num_classes)
-	codes = reduce_codes(codes,20)
+	codes = reduce_codes(codes,50)
 	funs = codes.shape[1]
 	m,d = train.shape
 	train_y = np.copy(train[:,d-1])
