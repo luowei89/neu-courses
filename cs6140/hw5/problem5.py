@@ -1,4 +1,4 @@
-import random, time
+import time
 import numpy as np
 import ada_boosting as ab
 
@@ -9,6 +9,8 @@ COLOR_THRESHOLD = 255/2
 TRAIN_SIZE = 60000
 TEST_SIZE = 10000
 NUM_RECTS = 100
+
+SAMPLE = 20
 
 def read_file():
 	train_labels = np.fromfile("../dataset/digits/train-labels-idx1-ubyte",dtype=np.dtype('u1'))[TEST_OFFSET:]
@@ -82,10 +84,23 @@ def random_rectangle():
 def ecoc_image():
 	print "============================================="
 	print "loading image features..."
-	train = np.loadtxt("digits/train.txt")
+	train = np.loadtxt("digits/train_%d.txt" %SAMPLE)
 	test = np.loadtxt("digits/test.txt")
 	print "============================================="
 	ecoc(train,test,len(np.unique(test[:,test.shape[1]-1])))
+
+def reduce_train(percent):
+	train = np.loadtxt("digits/train.txt")
+	m,d = train.shape
+	labels = train[:,d-1]
+	new_train = []
+	for l in np.unique(labels):
+		l_train = train[labels[:]==l]
+		l_m = len(l_train)
+		idxs = np.random.choice(range(l_m),size=int(percent*l_m),replace=False)
+		l_train_reduced = l_train[idxs]
+		new_train.append(l_train_reduced)
+	np.savetxt("digits/train_%d.txt" %SAMPLE,np.vstack(new_train),fmt='%i')
 
 def exhaustive_codes(num):
 	funs = 2**(num-1)-1
@@ -95,7 +110,7 @@ def exhaustive_codes(num):
 	return codes
 
 def reduce_codes(codes,size):
-	rand_idx = random.sample(range(codes.shape[1]),size)
+	rand_idx = np.random.choice(range(codes.shape[1]),size=size,replace=False)
 	return codes[:,rand_idx]
 
 def ecoc_predict(test_X,predictors,codes):
@@ -139,5 +154,7 @@ if __name__ == '__main__':
 	#read_file()
 	"step 2. load the txt files and extract feature and save it as txt"
 	#extract_features()
-	"step 3. run ecoc with extracted features"
+	"step 3. reduce the train dataset to SAMPLE percent and save it as txt"
+	#reduce_train(SAMPLE/100.0)
+	"step 4. run ecoc with extracted features"
 	ecoc_image()
