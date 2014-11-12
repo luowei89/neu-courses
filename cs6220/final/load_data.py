@@ -19,6 +19,7 @@ def load_data(data_file):
 	db = database.Database()
 	pub_id = -1
 	for line in fdata:
+		line = line.replace("\\","").replace("'","\\'").replace("\"","\\\"")
 		if line.startswith(id_head):
 			# new publication
 			if pub_id != -1:
@@ -32,7 +33,7 @@ def load_data(data_file):
 			au_line = line[len(au_head)+1:].rstrip()
 			aus = au_line.split(";")
 			for au in aus:
-				au_id = author.Author(au).save(db)
+				au_id = author.Author(au.lstrip().rstrip()).save(db)
 				author_pub.AuthorPub(au_id,pub_id).save(db)
 		elif line.startswith(yr_head):
 			yr_line = line[len(yr_head)+1:].rstrip()
@@ -47,6 +48,7 @@ def load_data(data_file):
 		elif line.startswith(ab_head):
 			abstract = line[len(ab_head)+1:].rstrip()
 			pub.abstract = abstract
+	pub.save(db)
 	fdata.close()
 
 if __name__ == '__main__':

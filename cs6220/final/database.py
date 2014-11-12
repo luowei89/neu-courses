@@ -14,6 +14,7 @@ class Database:
             self.cursor.execute(query)
             self.connection.commit()
         except:
+            print query
             self.connection.rollback()
         return self.cursor.lastrowid
 
