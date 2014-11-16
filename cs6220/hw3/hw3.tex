@@ -1,0 +1,250 @@
+\documentclass[11pt,a4paper,fleqn]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{graphicx}
+\usepackage{multicol}
+\usepackage{subcaption}
+\makeatletter
+\setlength{\@fptop}{0pt}
+\setlength{\@fpbot}{0pt plus 1fil}
+\makeatother
+\begin{document}
+\begin{center}
+\textbf{CS6220 Data Mining Fall 2014 Homework 3, Wei Luo}\\
+\end{center}
+\textbf{1. Frequent Pattern Mining for Set Data}\\
+(a) Scan the Database once, we get:\\
+a:8 b:7 c:6 d:5 e:3\\
+Sort them and build the FP-tree:\\
+\includegraphics[scale=0.6]{1a.png}\\
+(b) e's conditional pattern base is:\\
+acd:1, ad:1, bc:1\\
+So for e's conditional FP-tree, we have:\\
+a:2 b:1 c:2 d:2 , remove b:1 since it doesn't reach the min\_support=2, e's conditional FP-tree is:\\
+\includegraphics[scale=0.6]{1b.png}\\
+Frequent patterns based on e's conditional FP-tree: e, ae, ce, de, ade, cde, ace, acde.\\ \\ \\
+\textbf{2. Correction Analysis}\\
+(a) Based on the observed values given, we can calculate the probabilities and get the observed values table:\\
+\begin{tabular}{|c|c|c|c|}
+\hline
+ &Beer&No Beer&Total\\
+\hline
+Nuts&17&833&850\\
+\hline
+No Nuts&183&8967&9150\\
+\hline
+Total&200&9800&10000\\
+\hline
+\end{tabular}\\ \\
+$confidence(Beer \Rightarrow Nuts) = 50/200 = 0.25$\\
+$lift(Beer,Nuts) = \frac{P(Beer \cup Nuts)}{P(Beer)P(Nuts)} = \frac{50/10000}{200/10000*850/10000} = 2.9412$\\
+$\chi ^2 = \frac{(50-17)^2}{17}+\frac{(800-833)^2}{833}+\frac{(150-183)^2}{183}+\frac{(9000-8967)^2}{8967}= 71.4384$\\
+$all\_confidence = min(P(Beer|Nuts),P(Nuts|Beer)) = min(50/850, 50/200) = 0.0588$\\
+(b) Since $lift(Beer,Nuts) = 2.9412 > 1$. Buying beer and buying nuts are positively correlated.\\
+\newpage \noindent
+\textbf{3. Sequential Pattern Mining (GSP Algorithm)}\\
+(a) For a sequence $s=\langle (ab)(cd)ef\rangle $. $s$ contains 4 elements. The length of $s$ is 8. It contains 63 non-empty subsequences.\\
+(b) From $L_3$ drop the first and last element of each sequence, we can get:\\
+\begin{tabular}{|c|c|c|c|}
+\hline
+ID&s&drop first&drop last\\
+\hline
+1.&$\langle (ab)c\rangle $&$\langle (b)c\rangle $&$\langle (ab)\rangle $\\
+2.&$\langle (ab)d\rangle $&$\langle (b)d\rangle $&$\langle (ab)\rangle $\\
+3.&$\langle a(cd)\rangle $&$\langle (cd)\rangle $&$\langle a(c)\rangle $\\
+4.&$\langle (ac)e\rangle $&$\langle (c)e\rangle $&$\langle (ac)\rangle $\\
+5.&$\langle b(cd)\rangle $&$\langle (cd)\rangle $&$\langle b(c)\rangle $\\
+6.&$\langle bce\rangle $&$\langle ce\rangle $&$\langle bc\rangle $\\
+\hline
+\end{tabular}\\
+We can see that 1 and 5 , 1 and 6 can be joined. Join them we get:\\
+$\langle (ab)(cd)\rangle $, $\langle (ab)ce\rangle $\\
+For $\langle (ab)(cd)\rangle $, all its length 3 subsequences are in $L_3$, keep it.\\
+For $\langle (ab)ce\rangle $, its subsequence $\langle (ab)e\rangle $ is not in $L_3$, so we prune it.\\
+So $C_4$ is  $\langle (ab)(cd)\rangle $.\\ \\ \\
+\textbf{4. Application}\\
+First, get the titles of papers in the 20 conferences in time periods 2001-2005, 2008-2012. Then, use tools from nltk to get tokens from each title. Ignore stop words, punctuations and numbers. After that, use PyFIM with APRIORI algorithm to find the frequent sequence patterns. \\The results are:\\ \\ \noindent
+For year 2001-2005:\\
+Top 20 most frequent patterns with length 1
+\begin{multicols}{4} \noindent 
+$\langle$data$\rangle$ :1231\\
+$\langle$based$\rangle$ :764\\
+$\langle$mining$\rangle$ :665\\
+$\langle$using$\rangle$ :607\\
+$\langle$web$\rangle$ :591\\
+$\langle$learning$\rangle$ :521\\
+$\langle$information$\rangle$ :418\\
+$\langle$xml$\rangle$ :383\\
+$\langle$retrieval$\rangle$ :316\\
+$\langle$search$\rangle$ :314\\
+$\langle$query$\rangle$ :313\\
+$\langle$clustering$\rangle$ :307\\
+$\langle$efficient$\rangle$ :289\\
+$\langle$approach$\rangle$ :276\\
+$\langle$classification$\rangle$ :264\\
+$\langle$system$\rangle$ :243\\
+$\langle$database$\rangle$ :238\\
+$\langle$model$\rangle$ :231\\
+$\langle$queries$\rangle$ :226\\
+$\langle$systems$\rangle$ :225\\
+\end{multicols} \noindent
+Top 20 most frequent patterns with length 2
+\begin{multicols}{3} \noindent
+$\langle$mining data$\rangle$ :297\\
+$\langle$based data$\rangle$ :105\\
+$\langle$streams data$\rangle$ :95\\
+$\langle$using data$\rangle$ :88\\
+$\langle$clustering data$\rangle$ :82\\
+$\langle$xml data$\rangle$ :82\\
+$\langle$clustering based$\rangle$ :75\\
+$\langle$web data$\rangle$ :74\\
+$\langle$web mining$\rangle$ :74\\
+$\langle$management data$\rangle$ :72\\
+$\langle$web based$\rangle$ :70\\
+$\langle$frequent mining$\rangle$ :67\\
+$\langle$patterns mining$\rangle$ :62\\
+$\langle$approach based$\rangle$ :58\\
+$\langle$association mining$\rangle$ :55\\
+$\langle$learning data$\rangle$ :54\\
+$\langle$efficient data$\rangle$ :53\\
+$\langle$model based$\rangle$ :53\\
+$\langle$dimensional data$\rangle$ :51\\
+$\langle$learning based$\rangle$ :50\\
+\end{multicols} \noindent
+Top 20 most frequent patterns with length 3
+\begin{multicols}{3} \noindent
+$\langle$asia mining data$\rangle$ :6\\
+$\langle$mdm mining data$\rangle$ :6\\
+$\langle$pacific mining data$\rangle$ :6\\
+$\langle$dm mining data$\rangle$ :3\\
+$\langle$pakdd mining data$\rangle$ :3\\
+$\langle$academy mining data$\rangle$ :2\\
+$\langle$bad mining data$\rangle$ :2\\
+$\langle$cliques data mining$\rangle$ :2\\
+$\langle$drifting mining data$\rangle$ :2\\
+$\langle$fractals mining data$\rangle$ :2\\
+$\langle$grids mining data$\rangle$ :2\\
+$\langle$medicine mining data$\rangle$ :2\\
+$\langle$ole mining data$\rangle$ :2\\
+$\langle$peculiarity data mining$\rangle$ :2\\
+$\langle$ssp mining data$\rangle$ :2\\
+$\langle$ugly mining data$\rangle$ :2\\
+$\langle$warehouse based data$\rangle$ :2\\
+$\langle$7th data mining$\rangle$ :1\\
+$\langle$aaand mining using$\rangle$ :1\\
+$\langle$aboutness using based$\rangle$ :1\\
+\end{multicols} \noindent
+Top 20 most frequent patterns with length 4
+\begin{multicols}{2} \noindent
+$\langle$adherence using based data$\rangle$ :1\\
+$\langle$admit mining based data$\rangle$ :1\\
+$\langle$bibfinder mining using data$\rangle$ :1\\
+$\langle$columbia mining based data$\rangle$ :1\\
+$\langle$cooperatively mining using data$\rangle$ :1\\
+$\langle$deployment mining based data$\rangle$ :1\\
+$\langle$divisive mining using data$\rangle$ :1\\
+$\langle$effectively mining using data$\rangle$ :1\\
+$\langle$gdt mining using data$\rangle$ :1\\
+$\langle$generalised mining using data$\rangle$ :1\\
+$\langle$ibl mining using data$\rangle$ :1\\
+$\langle$ids mining based data$\rangle$ :1\\
+$\langle$infer mining using data$\rangle$ :1\\
+$\langle$lead mining using data$\rangle$ :1\\
+$\langle$meningitis mining using data$\rangle$ :1\\
+$\langle$rs mining using data$\rangle$ :1\\
+$\langle$rsbr mining using data$\rangle$ :1\\
+$\langle$simplicial mining using data$\rangle$ :1\\
+$\langle$statminer mining using data$\rangle$ :1\\
+$\langle$ubdm mining based data$\rangle$ :1\\
+\end{multicols} \noindent \\
+For year 2008-2012:\\
+Top 20 most frequent patterns with length 1
+\begin{multicols}{4} \noindent 
+$\langle$data$\rangle$ :1856\\
+$\langle$based$\rangle$ :1783\\
+$\langle$using$\rangle$ :1129\\
+$\langle$learning$\rangle$ :1099\\
+$\langle$mining$\rangle$ :1004\\
+$\langle$search$\rangle$ :738\\
+$\langle$information$\rangle$ :637\\
+$\langle$analysis$\rangle$ :617\\
+$\langle$web$\rangle$ :596\\
+$\langle$system$\rangle$ :569\\
+$\langle$classification$\rangle$ :546\\
+$\langle$query$\rangle$ :542\\
+$\langle$efficient$\rangle$ :511\\
+$\langle$clustering$\rangle$ :505\\
+$\langle$retrieval$\rangle$ :493\\
+$\langle$model$\rangle$ :484\\
+$\langle$networks$\rangle$ :480\\
+$\langle$approach$\rangle$ :474\\
+$\langle$multi$\rangle$ :474\\
+$\langle$time$\rangle$ :386\\
+\end{multicols} \noindent
+Top 20 most frequent patterns with length 2
+\begin{multicols}{3} \noindent
+$\langle$mining data$\rangle$ :421\\
+$\langle$data based$\rangle$ :179\\
+$\langle$system based$\rangle$ :152\\
+$\langle$model based$\rangle$ :136\\
+$\langle$streams data$\rangle$ :127\\
+$\langle$using data$\rangle$ :127\\
+$\langle$approach based$\rangle$ :123\\
+$\langle$machine learning$\rangle$ :123\\
+$\langle$clustering based$\rangle$ :119\\
+$\langle$using based$\rangle$ :117\\
+$\langle$learning using$\rangle$ :115\\
+$\langle$algorithm based$\rangle$ :113\\
+$\langle$mining based$\rangle$ :111\\
+$\langle$analysis data$\rangle$ :110\\
+$\langle$learning based$\rangle$ :108\\
+$\langle$research based$\rangle$ :100\\
+$\langle$analysis based$\rangle$ :95\\
+$\langle$learning data$\rangle$ :94\\
+$\langle$multi learning$\rangle$ :94\\
+$\langle$management data$\rangle$ :93\\
+\end{multicols} \noindent
+Top 20 most frequent patterns with length 3
+\begin{multicols}{2} \noindent
+$\langle$warehouses based data$\rangle$ :3\\
+$\langle$modis using data$\rangle$ :2\\
+$\langle$pathway data based$\rangle$ :2\\
+$\langle$abnormalities learning data$\rangle$ :1\\
+$\langle$abnormalities learning using$\rangle$ :1\\
+$\langle$abnormalities using data$\rangle$ :1\\
+$\langle$abundant learning based$\rangle$ :1\\
+$\langle$accents learning using$\rangle$ :1\\
+$\langle$aco using based$\rangle$ :1\\
+$\langle$adverse using data$\rangle$ :1\\
+$\langle$affected using data$\rangle$ :1\\
+$\langle$albatross using data$\rangle$ :1\\
+$\langle$ale using based$\rangle$ :1\\
+$\langle$alias learning based$\rangle$ :1\\
+$\langle$allow based data$\rangle$ :1\\
+$\langle$alphabets based using$\rangle$ :1\\
+$\langle$alpos learning data$\rangle$ :1\\
+$\langle$american learning using$\rangle$ :1\\
+$\langle$analyst data based$\rangle$ :1\\
+$\langle$ancheng data based$\rangle$ :1\\
+\end{multicols} \newpage \noindent
+Top 20 most frequent patterns with length 4
+\begin{multicols}{2} \noindent
+$\langle$abnormalities learning using data$\rangle$ :1\\
+$\langle$bee using data based$\rangle$ :1\\
+$\langle$ciphertext using data based$\rangle$ :1\\
+$\langle$comet learning using data$\rangle$ :1\\
+$\langle$froc learning using data$\rangle$ :1\\
+$\langle$hazards using data based$\rangle$ :1\\
+$\langle$homogenous learning using data$\rangle$ :1\\
+$\langle$pathway using data based$\rangle$ :1\\
+$\langle$periodical learning data based$\rangle$ :1\\
+$\langle$recipe learning using data$\rangle$ :1\\
+$\langle$remaining using data based$\rangle$ :1\\
+$\langle$reverible learning using data$\rangle$ :1\\
+$\langle$rotation learning data based$\rangle$ :1\\
+$\langle$sigma using data based$\rangle$ :1\\
+$\langle$subdivision learning data based$\rangle$ :1\\
+$\langle$tailed using data based$\rangle$ :1\\
+$\langle$topographic learning using data$\rangle$ :1\\
+$\langle$vibratory using data based$\rangle$ :1\\
+\end{multicols} \noindent
+\end{document}
