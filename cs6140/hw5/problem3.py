@@ -51,8 +51,8 @@ if __name__ == '__main__':
 	test_X = np.loadtxt("../dataset/spam_polluted/test_feature.txt")
 	test_y = np.loadtxt("../dataset/spam_polluted/test_label.txt")
 	print "============================================="
-	train_X_norm,t_means,t_stds =  gd.normalize(train_X)
-	test_X_norm = gd.normalizeMS(test_X,t_means,t_stds)
+	train_X_norm,t_means,t_stds =  gd.normalize(np.concatenate((np.ones((len(train_X),1)),train_X),1))
+	test_X_norm = gd.normalizeMS(np.concatenate((np.ones((len(test_X),1)),test_X),1),t_means,t_stds)
 
 	np.seterr(over="ignore") # ignore overflow in exp
 	logistic_regression(train_X_norm,train_y,test_X_norm,test_y)
