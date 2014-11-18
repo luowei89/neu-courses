@@ -21,7 +21,7 @@ acd:1, ad:1, bc:1\\
 So for e's conditional FP-tree, we have:\\
 a:2 b:1 c:2 d:2 , remove b:1 since it doesn't reach the min\_support=2, e's conditional FP-tree is:\\
 \includegraphics[scale=0.6]{1b.png}\\
-Frequent patterns based on e's conditional FP-tree: e, ae, ce, de, ade, cde, ace, acde.\\ \\ \\
+Frequent patterns based on e's conditional FP-tree: e, ae, ce, de, ade.\\ \\ \\
 \textbf{2. Correction Analysis}\\
 (a) Based on the observed values given, we can calculate the probabilities and get the observed values table:\\
 \begin{tabular}{|c|c|c|c|}
@@ -42,7 +42,7 @@ $all\_confidence = min(P(Beer|Nuts),P(Nuts|Beer)) = min(50/850, 50/200) = 0.0588
 (b) Since $lift(Beer,Nuts) = 2.9412 > 1$. Buying beer and buying nuts are positively correlated.\\
 \newpage \noindent
 \textbf{3. Sequential Pattern Mining (GSP Algorithm)}\\
-(a) For a sequence $s=\langle (ab)(cd)ef\rangle $. $s$ contains 4 elements. The length of $s$ is 8. It contains 63 non-empty subsequences.\\
+(a) For a sequence $s=\langle (ab)(cd)ef\rangle $. $s$ contains 4 elements. The length of $s$ is 6. It contains 63 non-empty subsequences.\\
 (b) From $L_3$ drop the first and last element of each sequence, we can get:\\
 \begin{tabular}{|c|c|c|c|}
 \hline
@@ -62,7 +62,7 @@ For $\langle (ab)(cd)\rangle $, all its length 3 subsequences are in $L_3$, keep
 For $\langle (ab)ce\rangle $, its subsequence $\langle (ab)e\rangle $ is not in $L_3$, so we prune it.\\
 So $C_4$ is  $\langle (ab)(cd)\rangle $.\\ \\ \\
 \textbf{4. Application}\\
-First, get the titles of papers in the 20 conferences in time periods 2001-2005, 2008-2012. Then, use tools from nltk to get tokens from each title. Ignore stop words, punctuations and numbers. After that, use PyFIM with APRIORI algorithm to find the frequent sequence patterns. \\The results are:\\ \\ \noindent
+First, get the titles of papers in the 20 conferences in time periods 2001-2005, 2008-2012. Then, use tools from nltk to get tokens from each title. Ignore stop words, punctuations and numbers. After that, use PrefixSpan algorithm to find the frequent sequence patterns. \\The results are:\\ \\ \noindent
 For year 2001-2005:\\
 Top 20 most frequent patterns with length 1
 \begin{multicols}{4} \noindent 
@@ -89,72 +89,72 @@ $\langle$systems$\rangle$ :225\\
 \end{multicols} \noindent
 Top 20 most frequent patterns with length 2
 \begin{multicols}{3} \noindent
-$\langle$mining data$\rangle$ :297\\
+$\langle$data mining$\rangle$ :297\\
+$\langle$information retrieval$\rangle$ :151\\
 $\langle$based data$\rangle$ :105\\
-$\langle$streams data$\rangle$ :95\\
-$\langle$using data$\rangle$ :88\\
-$\langle$clustering data$\rangle$ :82\\
+$\langle$data streams$\rangle$ :95\\
+$\langle$data using$\rangle$ :88\\
+$\langle$time series$\rangle$ :83\\
+$\langle$data clustering$\rangle$ :82\\
 $\langle$xml data$\rangle$ :82\\
-$\langle$clustering based$\rangle$ :75\\
+$\langle$based clustering$\rangle$ :75\\
+$\langle$proceedings conference$\rangle$ :74\\
 $\langle$web data$\rangle$ :74\\
 $\langle$web mining$\rangle$ :74\\
+$\langle$association rules$\rangle$ :72\\
 $\langle$management data$\rangle$ :72\\
+$\langle$search web$\rangle$ :72\\
 $\langle$web based$\rangle$ :70\\
+$\langle$dimensional high$\rangle$ :69\\
 $\langle$frequent mining$\rangle$ :67\\
-$\langle$patterns mining$\rangle$ :62\\
-$\langle$approach based$\rangle$ :58\\
-$\langle$association mining$\rangle$ :55\\
-$\langle$learning data$\rangle$ :54\\
-$\langle$efficient data$\rangle$ :53\\
-$\langle$model based$\rangle$ :53\\
-$\langle$dimensional data$\rangle$ :51\\
-$\langle$learning based$\rangle$ :50\\
+$\langle$report workshop$\rangle$ :66\\
+$\langle$processing query$\rangle$ :64\\
 \end{multicols} \noindent
 Top 20 most frequent patterns with length 3
-\begin{multicols}{3} \noindent
-$\langle$asia mining data$\rangle$ :6\\
-$\langle$mdm mining data$\rangle$ :6\\
-$\langle$pacific mining data$\rangle$ :6\\
-$\langle$dm mining data$\rangle$ :3\\
-$\langle$pakdd mining data$\rangle$ :3\\
-$\langle$academy mining data$\rangle$ :2\\
-$\langle$bad mining data$\rangle$ :2\\
-$\langle$cliques data mining$\rangle$ :2\\
-$\langle$drifting mining data$\rangle$ :2\\
-$\langle$fractals mining data$\rangle$ :2\\
-$\langle$grids mining data$\rangle$ :2\\
-$\langle$medicine mining data$\rangle$ :2\\
-$\langle$ole mining data$\rangle$ :2\\
-$\langle$peculiarity data mining$\rangle$ :2\\
-$\langle$ssp mining data$\rangle$ :2\\
-$\langle$ugly mining data$\rangle$ :2\\
-$\langle$warehouse based data$\rangle$ :2\\
-$\langle$7th data mining$\rangle$ :1\\
-$\langle$aaand mining using$\rangle$ :1\\
-$\langle$aboutness using based$\rangle$ :1\\
+\begin{multicols}{2} \noindent
+$\langle$proceedings international conference$\rangle$ :47\\
+$\langle$high dimensional data$\rangle$ :39\\
+$\langle$support vector machines$\rangle$ :39\\
+$\langle$proceedings conference data$\rangle$ :32\\
+$\langle$language information retrieval$\rangle$ :28\\
+$\langle$data mining knowledge$\rangle$ :26\\
+$\langle$association rules mining$\rangle$ :25\\
+$\langle$data mining workshop$\rangle$ :25\\
+$\langle$discovery knowledge data$\rangle$ :24\\
+$\langle$proceedings international data$\rangle$ :24\\
+$\langle$proceedings data mining$\rangle$ :24\\
+$\langle$international conference data$\rangle$ :23\\
+$\langle$proceedings conference mining$\rangle$ :23\\
+$\langle$report workshop data$\rangle$ :23\\
+$\langle$rule association mining$\rangle$ :23\\
+$\langle$conference data mining$\rangle$ :22\\
+$\langle$discovery knowledge mining$\rangle$ :22\\
+$\langle$preserving privacy data$\rangle$ :22\\
+$\langle$workshop retrieval information$\rangle$ :22\\
+$\langle$series time data$\rangle$ :21\\
 \end{multicols} \noindent
 Top 20 most frequent patterns with length 4
 \begin{multicols}{2} \noindent
-$\langle$adherence using based data$\rangle$ :1\\
-$\langle$admit mining based data$\rangle$ :1\\
-$\langle$bibfinder mining using data$\rangle$ :1\\
-$\langle$columbia mining based data$\rangle$ :1\\
-$\langle$cooperatively mining using data$\rangle$ :1\\
-$\langle$deployment mining based data$\rangle$ :1\\
-$\langle$divisive mining using data$\rangle$ :1\\
-$\langle$effectively mining using data$\rangle$ :1\\
-$\langle$gdt mining using data$\rangle$ :1\\
-$\langle$generalised mining using data$\rangle$ :1\\
-$\langle$ibl mining using data$\rangle$ :1\\
-$\langle$ids mining based data$\rangle$ :1\\
-$\langle$infer mining using data$\rangle$ :1\\
-$\langle$lead mining using data$\rangle$ :1\\
-$\langle$meningitis mining using data$\rangle$ :1\\
-$\langle$rs mining using data$\rangle$ :1\\
-$\langle$rsbr mining using data$\rangle$ :1\\
-$\langle$simplicial mining using data$\rangle$ :1\\
-$\langle$statminer mining using data$\rangle$ :1\\
-$\langle$ubdm mining based data$\rangle$ :1\\
+$\langle$proceedings international conference data$\rangle$ :22\\
+$\langle$proceedings conference data mining$\rangle$ :21\\
+$\langle$discovery knowledge data mining$\rangle$ :19\\
+$\langle$proceedings conference discovery knowledge$\rangle$ :18\\
+$\langle$proceedings discovery knowledge mining$\rangle$ :18\\
+$\langle$conference discovery mining knowledge$\rangle$ :17\\
+$\langle$proceedings conference knowledge mining$\rangle$ :17\\
+$\langle$proceedings knowledge data mining$\rangle$ :17\\
+$\langle$conference knowledge data mining$\rangle$ :16\\
+$\langle$proceedings conference discovery mining$\rangle$ :16\\
+$\langle$proceedings discovery knowledge data$\rangle$ :16\\
+$\langle$proceedings discovery data mining$\rangle$ :16\\
+$\langle$conference discovery data knowledge$\rangle$ :15\\
+$\langle$conference discovery data mining$\rangle$ :15\\
+$\langle$proceedings conference knowledge data$\rangle$ :15\\
+$\langle$acm proceedings international conference$\rangle$ :14\\
+$\langle$cross language retrieval information$\rangle$ :14\\
+$\langle$dimensional high clustering data$\rangle$ :14\\
+$\langle$proceedings international conference mining$\rangle$ :14\\
+$\langle$proceedings conference discovery data$\rangle$ :14\\
 \end{multicols} \noindent \\
 For year 2008-2012:\\
 Top 20 most frequent patterns with length 1
@@ -182,69 +182,71 @@ $\langle$time$\rangle$ :386\\
 \end{multicols} \noindent
 Top 20 most frequent patterns with length 2
 \begin{multicols}{3} \noindent
-$\langle$mining data$\rangle$ :421\\
-$\langle$data based$\rangle$ :179\\
+$\langle$data mining$\rangle$ :421\\
+$\langle$information retrieval$\rangle$ :233\\
+$\langle$based data$\rangle$ :179\\
+$\langle$social networks$\rangle$ :155\\
 $\langle$system based$\rangle$ :152\\
+$\langle$scale large$\rangle$ :139\\
 $\langle$model based$\rangle$ :136\\
-$\langle$streams data$\rangle$ :127\\
+$\langle$feature selection$\rangle$ :131\\
+$\langle$web search$\rangle$ :128\\
+$\langle$data streams$\rangle$ :127\\
 $\langle$using data$\rangle$ :127\\
 $\langle$approach based$\rangle$ :123\\
 $\langle$machine learning$\rangle$ :123\\
+$\langle$time series$\rangle$ :123\\
+$\langle$semi supervised$\rangle$ :122\\
 $\langle$clustering based$\rangle$ :119\\
 $\langle$using based$\rangle$ :117\\
 $\langle$learning using$\rangle$ :115\\
 $\langle$algorithm based$\rangle$ :113\\
 $\langle$mining based$\rangle$ :111\\
-$\langle$analysis data$\rangle$ :110\\
-$\langle$learning based$\rangle$ :108\\
-$\langle$research based$\rangle$ :100\\
-$\langle$analysis based$\rangle$ :95\\
-$\langle$learning data$\rangle$ :94\\
-$\langle$multi learning$\rangle$ :94\\
-$\langle$management data$\rangle$ :93\\
 \end{multicols} \noindent
 Top 20 most frequent patterns with length 3
 \begin{multicols}{2} \noindent
-$\langle$warehouses based data$\rangle$ :3\\
-$\langle$modis using data$\rangle$ :2\\
-$\langle$pathway data based$\rangle$ :2\\
-$\langle$abnormalities learning data$\rangle$ :1\\
-$\langle$abnormalities learning using$\rangle$ :1\\
-$\langle$abnormalities using data$\rangle$ :1\\
-$\langle$abundant learning based$\rangle$ :1\\
-$\langle$accents learning using$\rangle$ :1\\
-$\langle$aco using based$\rangle$ :1\\
-$\langle$adverse using data$\rangle$ :1\\
-$\langle$affected using data$\rangle$ :1\\
-$\langle$albatross using data$\rangle$ :1\\
-$\langle$ale using based$\rangle$ :1\\
-$\langle$alias learning based$\rangle$ :1\\
-$\langle$allow based data$\rangle$ :1\\
-$\langle$alphabets based using$\rangle$ :1\\
-$\langle$alpos learning data$\rangle$ :1\\
-$\langle$american learning using$\rangle$ :1\\
-$\langle$analyst data based$\rangle$ :1\\
-$\langle$ancheng data based$\rangle$ :1\\
-\end{multicols} \newpage \noindent
+$\langle$proceedings international conference$\rangle$ :63\\
+$\langle$proceedings data mining$\rangle$ :61\\
+$\langle$international data mining$\rangle$ :53\\
+$\langle$proceedings international data$\rangle$ :53\\
+$\langle$proceedings conference data$\rangle$ :52\\
+$\langle$semi supervised learning$\rangle$ :51\\
+$\langle$data mining workshop$\rangle$ :51\\
+$\langle$conference data mining$\rangle$ :45\\
+$\langle$high dimensional data$\rangle$ :43\\
+$\langle$discovery knowledge data$\rangle$ :43\\
+$\langle$proceedings conference mining$\rangle$ :42\\
+$\langle$proceedings international mining$\rangle$ :42\\
+$\langle$international workshop data$\rangle$ :42\\
+$\langle$data mining based$\rangle$ :42\\
+$\langle$proceedings discovery knowledge$\rangle$ :41\\
+$\langle$machines vector support$\rangle$ :38\\
+$\langle$conference discovery knowledge$\rangle$ :37\\
+$\langle$international mining workshop$\rangle$ :35\\
+$\langle$conference international data$\rangle$ :34\\
+$\langle$series time data$\rangle$ :34\\
+\end{multicols} \noindent
 Top 20 most frequent patterns with length 4
 \begin{multicols}{2} \noindent
-$\langle$abnormalities learning using data$\rangle$ :1\\
-$\langle$bee using data based$\rangle$ :1\\
-$\langle$ciphertext using data based$\rangle$ :1\\
-$\langle$comet learning using data$\rangle$ :1\\
-$\langle$froc learning using data$\rangle$ :1\\
-$\langle$hazards using data based$\rangle$ :1\\
-$\langle$homogenous learning using data$\rangle$ :1\\
-$\langle$pathway using data based$\rangle$ :1\\
-$\langle$periodical learning data based$\rangle$ :1\\
-$\langle$recipe learning using data$\rangle$ :1\\
-$\langle$remaining using data based$\rangle$ :1\\
-$\langle$reverible learning using data$\rangle$ :1\\
-$\langle$rotation learning data based$\rangle$ :1\\
-$\langle$sigma using data based$\rangle$ :1\\
-$\langle$subdivision learning data based$\rangle$ :1\\
-$\langle$tailed using data based$\rangle$ :1\\
-$\langle$topographic learning using data$\rangle$ :1\\
-$\langle$vibratory using data based$\rangle$ :1\\
+$\langle$proceedings conference data mining$\rangle$ :41\\
+$\langle$proceedings international data mining$\rangle$ :38\\
+$\langle$proceedings conference international data$\rangle$ :32\\
+$\langle$proceedings conference discovery knowledge$\rangle$ :32\\
+$\langle$discovery knowledge data mining$\rangle$ :27\\
+$\langle$international workshop data mining$\rangle$ :27\\
+$\langle$proceedings discovery knowledge data$\rangle$ :25\\
+$\langle$conference international data mining$\rangle$ :24\\
+$\langle$proceedings conference international mining$\rangle$ :23\\
+$\langle$proceedings conference machine learning$\rangle$ :22\\
+$\langle$part conference discovery knowledge$\rangle$ :22\\
+$\langle$preface workshop data mining$\rangle$ :22\\
+$\langle$conference discovery data knowledge$\rangle$ :21\\
+$\langle$proceedings international workshop data$\rangle$ :21\\
+$\langle$proceedings discovery knowledge mining$\rangle$ :21\\
+$\langle$proceedings discovery data mining$\rangle$ :21\\
+$\langle$conference discovery data mining$\rangle$ :20\\
+$\langle$conference discovery mining knowledge$\rangle$ :20\\
+$\langle$conference knowledge data mining$\rangle$ :20\\
+$\langle$part proceedings conference discovery$\rangle$ :20\\
 \end{multicols} \noindent
 \end{document}

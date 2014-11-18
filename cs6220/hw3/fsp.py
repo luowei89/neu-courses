@@ -27,7 +27,7 @@ def print_top_n(d,n):
 def find_by_year(years):
 	print 'For year %s:' %years
 	t_years = get_transactions('%s.csv' %years)
-	report_years = fim.apriori(t_years,supp=8,conf=0,zmax=4)
+	report_years = fim.apriori(t_years,supp=0,conf=0,zmax=4)
 	result_years = {}
 	for i in range(1,5):
 		result_years[i] = {}
