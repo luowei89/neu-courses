@@ -1,0 +1,43 @@
+\documentclass[11pt,a4paper,fleqn]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{graphicx} 
+\usepackage{pgfplots}
+\begin{document}
+\begin{center}
+\textbf{CS6140 Machine Learning Fall 2014 Homework 6, Wei Luo }\\
+\end{center}
+\textbf{PROBLEM 4}\\
+\\
+When $\alpha=0$, $y_i(w^Tx_i+b) > 1$, these points are not support vectors.\\
+When $0 < \alpha < C$, $y_i(w^Tx_i+b) = 1$, these points are support vectors on the margin line.\\
+When $\alpha = C$, $y_i(w^Tx_i+b) < 1$, these points are support vectors inside the margin line. They could be even missclassified.\\
+\\ \noindent
+\textbf{PROBLEM 5}\\
+\\
+We can plot the data as follow: red x is for label 0 red o is for label 1\\
+\begin{tikzpicture}
+\begin{axis}[
+    xmin=-0.5, xmax=2.5,
+    ymin=-0.5, ymax=2.5,
+    axis lines=center,
+    axis on top=true,
+    domain=-0.5:2.5,
+    ]
+    \addplot [domain={-0.5:2.5},mark=none,dashed] {1-x};
+    \addplot [domain={-0.5:2.5},mark=none,solid] {1.5-x};
+    \addplot [domain={-0:2},mark=none,dashed] {2-x};
+    \addplot [draw=red,only marks,mark=x] table {
+    1 1
+    2 2
+    2 0  
+    };
+    \addplot [draw=red,only marks, mark=o] table {
+    0 0
+    1 0
+    0 1
+    };
+\end{axis}
+\end{tikzpicture}\\
+The optimal hyperplane is x+y-1=0. Margin is $\sqrt{2}/4$\\
+And support vectors are: (0, 1) (1, 0) (1, 1) (2, 0)\\
+\end{document}
