@@ -44,7 +44,7 @@ public class IndexBuilder {
                     id = "";
                     text = "";
                 } else if (line.startsWith("<DOCNO>")){
-                    id = line.substring(7,line.length()-8);
+                    id = line.substring(7,line.length()-8).trim();
                 } else if (line.startsWith("<TEXT>")) {
                     texting = true;
                 } else if (line.startsWith("</TEXT>")) {
