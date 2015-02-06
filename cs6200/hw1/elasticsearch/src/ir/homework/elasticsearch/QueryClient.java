@@ -1,18 +1,21 @@
 package ir.homework.elasticsearch;
 
 import org.elasticsearch.action.search.SearchResponse;
+import org.elasticsearch.action.search.SearchType;
 import org.elasticsearch.client.Client;
+import org.elasticsearch.common.unit.TimeValue;
 import org.elasticsearch.index.query.QueryBuilder;
+import org.elasticsearch.index.query.functionscore.FunctionScoreQueryBuilder;
+import org.elasticsearch.index.query.functionscore.ScoreFunctionBuilder;
+import org.elasticsearch.index.query.functionscore.script.ScriptScoreFunctionBuilder;
 import org.elasticsearch.node.Node;
 import org.elasticsearch.node.NodeBuilder;
 import org.elasticsearch.search.SearchHit;
 
 import java.io.*;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
+import static org.elasticsearch.index.query.QueryBuilders.queryString;
 import static org.elasticsearch.index.query.QueryBuilders.termsQuery;
 
 /**
@@ -20,6 +23,9 @@ import static org.elasticsearch.index.query.QueryBuilders.termsQuery;
  * Created by Wei Luo on 1/23/15.
  */
 public class QueryClient {
+
+    public static float avgDocLength = -1;
+    public static int docNum = -1;
 
     public static HashMap<String,String[]> parseQueries(File file){
         HashMap<String,String[]> queries= new HashMap<String,String[]>();
@@ -49,16 +55,57 @@ public class QueryClient {
         return queries;
     }
 
-    public static void executeQuery(String[] terms,Client client){
+    public static void executeQuery(String queryID, String[] terms,Client client){
         QueryBuilder qb = termsQuery("text", terms);
+        Map<String,Object> params = new HashMap<String, Object>();
+        params.put("field","text");
+        params.put("terms",terms);
+        params.put("avgDocLength",avgDocLength);
+        ScoreFunctionBuilder sfb = new ScriptScoreFunctionBuilder()
+                .script("tf_idf_score_script").lang("native").params(params);
+        FunctionScoreQueryBuilder fsqb = new FunctionScoreQueryBuilder(qb)
+                .add(sfb)
+                .boostMode("replace");
         SearchResponse response = client.prepareSearch("ap_dataset")
-                .setQuery(qb).setSize(100).setExplain(true)
+                .setQuery(fsqb).setSize(100)
                 .execute()
                 .actionGet();
-        for (SearchHit hit : response.getHits().getHits()) {
-            System.out.println(hit.getScore());
-            //TODO: Handle the hit...
+
+        int index = 1;
+        for(SearchHit hit : response.getHits().getHits()){
+            String out = queryID;
+            out += " Q0";
+            out += " " + hit.getSource().get("docno").toString();
+            out += " " + index++;
+            out += " " + hit.getScore();
+            out += " Exp";
+            System.out.println(out);
         }
+    }
+
+    public static void initClient(Client client){
+        int docs = 0;
+        int totalLength = 0;
+        SearchResponse scrollResp = client.prepareSearch("ap_dataset")
+                .setSearchType(SearchType.SCAN)
+                .setScroll(new TimeValue(60000))
+                .setQuery(queryString("*:*"))
+                .setSize(10000).execute().actionGet();
+        //Scroll until no hits are returned
+        while (true) {
+            for (SearchHit hit : scrollResp.getHits().getHits()) {
+                docs += 1;
+                totalLength += hit.getSource().get("text").toString().trim().split(" ").length;
+            }
+            scrollResp = client.prepareSearchScroll(scrollResp.getScrollId())
+                    .setScroll(new TimeValue(600000)).execute().actionGet();
+            //Break condition: No hits are returned
+            if (scrollResp.getHits().getHits().length == 0) {
+                break;
+            }
+        }
+        docNum = docs;
+        avgDocLength = totalLength / docs;
     }
 
     public static void main(String[] args){
@@ -67,13 +114,14 @@ public class QueryClient {
 
         Node node = NodeBuilder.nodeBuilder().node();
         Client client = node.client();
-        Iterator<String> keySetIterator = queries.keySet().iterator();
 
+        initClient(client);
+
+        Iterator<String> keySetIterator = queries.keySet().iterator();
         while(keySetIterator.hasNext()){
             String key = keySetIterator.next();
-            executeQuery(queries.get(key),client);
+            executeQuery(key,queries.get(key),client);
         }
-
         node.close();
     }
 }
