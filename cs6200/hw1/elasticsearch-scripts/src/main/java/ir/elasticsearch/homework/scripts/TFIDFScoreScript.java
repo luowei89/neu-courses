@@ -20,16 +20,15 @@ public class TFIDFScoreScript extends AbstractSearchScript {
 
     String field = null;
     ArrayList<String> terms = null;
-    Float avgDocLength = null;
 
-    final static public String SCRIPT_NAME = "tf_idf_score_script";
+    public static final String SCRIPT_NAME = "tf_idf_score_script";
+    private final long avgDocLength = 442;
 
     public TFIDFScoreScript(Map<String, Object> params) {
         params.entrySet();
         terms = (ArrayList<String>) params.get("terms");
         field = (String) params.get("field");
-        avgDocLength = (Float) params.get("avgDocLength");
-        if (field == null || terms == null || avgDocLength == null) {
+        if (field == null || terms == null) {
             throw new ScriptException("Cannot initialize " + SCRIPT_NAME + ": parameter missing!");
         }
     }

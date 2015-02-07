@@ -14,18 +14,21 @@ import java.util.Map;
 
 /**
  * Information Retrieval Homework
- * Created by Wei Luo on 2/5/15.
+ * Created by Wei Luo on 2/6/15.
  */
-public class OkapiTFScoreScript extends AbstractSearchScript {
+public class OkapiBM25ScoreScript extends AbstractSearchScript {
 
     String field = null;
     ArrayList<String> terms = null;
 
-    public static final String SCRIPT_NAME = "okapitf_score_script";
+    public static final String SCRIPT_NAME = "okapi_bm25_score_script";
 
-    private final long avgDocLength = 442;
+    private static final double b = 0.75;
+    private static final double k1 = 1.2;
+    private static final int k2 = 100;
+    private static final long avgDocLength = 442;
 
-    public OkapiTFScoreScript(Map<String, Object> params) {
+    public OkapiBM25ScoreScript(Map<String, Object> params) {
         params.entrySet();
         terms = (ArrayList<String>) params.get("terms");
         field = (String) params.get("field");
@@ -44,9 +47,13 @@ public class OkapiTFScoreScript extends AbstractSearchScript {
 
             for (int i = 0; i < terms.size(); i++) {
                 IndexFieldTerm indexFieldTerm = indexField.get(terms.get(i));
+                int df = (int) indexFieldTerm.df();
                 int tf = indexFieldTerm.tf();
                 if (tf != 0) {
-                    score += tf/(tf+0.5+1.5*(lenD/avgDocLength));
+                    double log_term = Math.log(((float)indexField.docCount()+0.5)/((float)df+0.5));
+                    double k1_term = (tf+k1*tf)/(tf+k1*((1-b)+b*(lenD/avgDocLength)));
+                    double k2_term = (tf+k2*tf)/(tf+k2);
+                    score += log_term*k1_term*k2_term;
                 }
             }
             return score;
@@ -55,11 +62,11 @@ public class OkapiTFScoreScript extends AbstractSearchScript {
         }
     }
 
-    public static class OkapiTFScoreScriptFactory implements NativeScriptFactory {
+    public static class OkapiBM25ScoreScriptFactory implements NativeScriptFactory {
 
         @Override
         public ExecutableScript newScript(Map<String, Object> params) {
-            return new OkapiTFScoreScript(params);
+            return new OkapiBM25ScoreScript(params);
         }
     }
 }

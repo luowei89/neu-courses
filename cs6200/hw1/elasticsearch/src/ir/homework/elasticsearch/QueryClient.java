@@ -4,7 +4,6 @@ import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.search.SearchType;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.common.unit.TimeValue;
-import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.functionscore.FunctionScoreQueryBuilder;
 import org.elasticsearch.index.query.functionscore.ScoreFunctionBuilder;
 import org.elasticsearch.index.query.functionscore.script.ScriptScoreFunctionBuilder;
@@ -16,7 +15,6 @@ import java.io.*;
 import java.util.*;
 
 import static org.elasticsearch.index.query.QueryBuilders.queryString;
-import static org.elasticsearch.index.query.QueryBuilders.termsQuery;
 
 /**
  * Information Retrieval Homework
@@ -56,14 +54,13 @@ public class QueryClient {
     }
 
     public static void executeQuery(String queryID, String[] terms,Client client){
-        QueryBuilder qb = termsQuery("text", terms);
         Map<String,Object> params = new HashMap<String, Object>();
         params.put("field","text");
         params.put("terms",terms);
         params.put("avgDocLength",avgDocLength);
         ScoreFunctionBuilder sfb = new ScriptScoreFunctionBuilder()
-                .script("tf_idf_score_script").lang("native").params(params);
-        FunctionScoreQueryBuilder fsqb = new FunctionScoreQueryBuilder(qb)
+                .script("okapi_bm25_score_script").lang("native").params(params);
+        FunctionScoreQueryBuilder fsqb = new FunctionScoreQueryBuilder()
                 .add(sfb)
                 .boostMode("replace");
         SearchResponse response = client.prepareSearch("ap_dataset")

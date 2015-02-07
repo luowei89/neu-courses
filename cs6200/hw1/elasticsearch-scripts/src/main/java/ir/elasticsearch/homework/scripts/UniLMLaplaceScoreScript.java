@@ -14,18 +14,18 @@ import java.util.Map;
 
 /**
  * Information Retrieval Homework
- * Created by Wei Luo on 2/5/15.
+ * Created by Wei Luo on 2/6/15.
  */
-public class OkapiTFScoreScript extends AbstractSearchScript {
+public class UniLMLaplaceScoreScript extends AbstractSearchScript {
 
     String field = null;
     ArrayList<String> terms = null;
 
-    public static final String SCRIPT_NAME = "okapitf_score_script";
+    public static final String SCRIPT_NAME = "lm_laplace_script";
 
-    private final long avgDocLength = 442;
+    private static final long V = 178304;
 
-    public OkapiTFScoreScript(Map<String, Object> params) {
+    public UniLMLaplaceScoreScript(Map<String, Object> params) {
         params.entrySet();
         terms = (ArrayList<String>) params.get("terms");
         field = (String) params.get("field");
@@ -46,7 +46,7 @@ public class OkapiTFScoreScript extends AbstractSearchScript {
                 IndexFieldTerm indexFieldTerm = indexField.get(terms.get(i));
                 int tf = indexFieldTerm.tf();
                 if (tf != 0) {
-                    score += tf/(tf+0.5+1.5*(lenD/avgDocLength));
+                    score += Math.log((tf+1)/(lenD+V));
                 }
             }
             return score;
@@ -55,11 +55,11 @@ public class OkapiTFScoreScript extends AbstractSearchScript {
         }
     }
 
-    public static class OkapiTFScoreScriptFactory implements NativeScriptFactory {
+    public static class UniLMLaplaceScoreScriptFactory implements NativeScriptFactory {
 
         @Override
         public ExecutableScript newScript(Map<String, Object> params) {
-            return new OkapiTFScoreScript(params);
+            return new UniLMLaplaceScoreScript(params);
         }
     }
 }
