@@ -25,6 +25,13 @@ public class QueryClient {
     public static float avgDocLength = -1;
     public static int docNum = -1;
 
+    public static final String OKAPI_TF = "okapitf_score_script";
+    public static final String TF_IDF = "tf_idf_score_script";
+    public static final String OKAPI_BM25 = "okapi_bm25_score_script";
+    public static final String LM_LAPLACE = "lm_laplace_script";
+    public static final String LM_JM = "lm_jm_script";
+
+
     public static HashMap<String,String[]> parseQueries(File file){
         HashMap<String,String[]> queries= new HashMap<String,String[]>();
         try {
@@ -57,9 +64,8 @@ public class QueryClient {
         Map<String,Object> params = new HashMap<String, Object>();
         params.put("field","text");
         params.put("terms",terms);
-        params.put("avgDocLength",avgDocLength);
         ScoreFunctionBuilder sfb = new ScriptScoreFunctionBuilder()
-                .script("okapi_bm25_score_script").lang("native").params(params);
+                .script(LM_JM).lang("native").params(params);
         FunctionScoreQueryBuilder fsqb = new FunctionScoreQueryBuilder()
                 .add(sfb)
                 .boostMode("replace");
@@ -112,7 +118,7 @@ public class QueryClient {
         Node node = NodeBuilder.nodeBuilder().node();
         Client client = node.client();
 
-        initClient(client);
+        //initClient(client);
 
         Iterator<String> keySetIterator = queries.keySet().iterator();
         while(keySetIterator.hasNext()){

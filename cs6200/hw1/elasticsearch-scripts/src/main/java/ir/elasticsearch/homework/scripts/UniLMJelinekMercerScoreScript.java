@@ -46,7 +46,7 @@ public class UniLMJelinekMercerScoreScript extends AbstractSearchScript {
                 int tf = indexFieldTerm.tf();
                 long cf = indexFieldTerm.ttf();
                 if (tf != 0) {
-                    score += lambda*(tf/lenD)+(1-lambda)*(cf/V);
+                    score += Math.log(lambda*((float)tf/lenD)+(1-lambda)*((float)cf/V));
                 }
             }
             return score;

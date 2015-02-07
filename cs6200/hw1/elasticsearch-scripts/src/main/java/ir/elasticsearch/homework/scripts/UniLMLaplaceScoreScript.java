@@ -46,7 +46,7 @@ public class UniLMLaplaceScoreScript extends AbstractSearchScript {
                 IndexFieldTerm indexFieldTerm = indexField.get(terms.get(i));
                 int tf = indexFieldTerm.tf();
                 if (tf != 0) {
-                    score += Math.log((tf+1)/(lenD+V));
+                    score += Math.log((float)(tf+1))/((float)(lenD+V));
                 }
             }
             return score;
