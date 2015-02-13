@@ -23,7 +23,7 @@ public class OkapiTFScoreScript extends AbstractSearchScript {
 
     public static final String SCRIPT_NAME = "okapitf_score_script";
 
-    private final long avgDocLength = 442;
+    private final double avgDocLength = 164.68;
 
     public OkapiTFScoreScript(Map<String, Object> params) {
         params.entrySet();
@@ -40,13 +40,17 @@ public class OkapiTFScoreScript extends AbstractSearchScript {
             float score = 0;
             IndexField indexField = indexLookup().get(field);
 
-            long lenD = ((ScriptDocValues.Longs) doc().get("word_count")).getValue();
+//            int lenDoc = 0;
+//            for(String term : ((ScriptDocValues.Strings)doc().get("text")).getValues()){
+//                lenDoc += indexField.get(term).tf();
+//            }
+            int lenDoc = ((ScriptDocValues.Strings)doc().get(field)).getValues().size();
 
             for (int i = 0; i < terms.size(); i++) {
                 IndexFieldTerm indexFieldTerm = indexField.get(terms.get(i));
                 int tf = indexFieldTerm.tf();
                 if (tf != 0) {
-                    score += tf/(tf+0.5+1.5*(lenD/avgDocLength));
+                    score += (float)tf/(tf+0.5+1.5*((float)lenDoc/(float)avgDocLength));
                 }
             }
             return score;

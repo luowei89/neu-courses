@@ -26,7 +26,9 @@ public class OkapiBM25ScoreScript extends AbstractSearchScript {
     private static final double b = 0.75;
     private static final double k1 = 1.2;
     private static final int k2 = 100;
-    private static final long avgDocLength = 442;
+
+    //private final double avgDocLength = 247.79;
+    private final double avgDocLength = 164.68;
 
     public OkapiBM25ScoreScript(Map<String, Object> params) {
         params.entrySet();
@@ -43,16 +45,21 @@ public class OkapiBM25ScoreScript extends AbstractSearchScript {
             float score = 0;
             IndexField indexField = indexLookup().get(field);
 
-            long lenD = ((ScriptDocValues.Longs) doc().get("word_count")).getValue();
+//            int lenDoc = 0;
+//            for(String term : ((ScriptDocValues.Strings)doc().get("text")).getValues()){
+//                lenDoc += indexField.get(term).tf();
+//            }
+
+            int lenDoc = ((ScriptDocValues.Strings)doc().get(field)).getValues().size();
 
             for (int i = 0; i < terms.size(); i++) {
                 IndexFieldTerm indexFieldTerm = indexField.get(terms.get(i));
-                int df = (int) indexFieldTerm.df();
+                float df = (float) indexFieldTerm.df();
                 int tf = indexFieldTerm.tf();
                 if (tf != 0) {
-                    double log_term = Math.log(((float)indexField.docCount()+0.5)/((float)df+0.5));
-                    double k1_term = (tf+k1*tf)/(tf+k1*((1-b)+b*(lenD/avgDocLength)));
-                    double k2_term = (tf+k2*tf)/(tf+k2);
+                    double log_term = Math.log10((indexField.docCount() + 0.5) / (df + 0.5));
+                    double k1_term = (tf+k1*tf)/(tf+k1*((1-b)+b*((float)lenDoc/(float)avgDocLength)));
+                    double k2_term = (tf+k2*tf)/(float)(tf+k2);
                     score += log_term*k1_term*k2_term;
                 }
             }

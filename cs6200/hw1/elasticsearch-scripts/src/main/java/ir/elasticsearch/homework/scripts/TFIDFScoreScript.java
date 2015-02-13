@@ -22,7 +22,7 @@ public class TFIDFScoreScript extends AbstractSearchScript {
     ArrayList<String> terms = null;
 
     public static final String SCRIPT_NAME = "tf_idf_score_script";
-    private final long avgDocLength = 442;
+    private final double avgDocLength = 164.68;
 
     public TFIDFScoreScript(Map<String, Object> params) {
         params.entrySet();
@@ -39,14 +39,14 @@ public class TFIDFScoreScript extends AbstractSearchScript {
             float score = 0;
             IndexField indexField = indexLookup().get(field);
 
-            long lenD = ((ScriptDocValues.Longs) doc().get("word_count")).getValue();
+            int lenDoc = ((ScriptDocValues.Strings)doc().get(field)).getValues().size();
 
             for (int i = 0; i < terms.size(); i++) {
                 IndexFieldTerm indexFieldTerm = indexField.get(terms.get(i));
-                int df = (int) indexFieldTerm.df();
+                float df = (float) indexFieldTerm.df();
                 int tf = indexFieldTerm.tf();
                 if (tf != 0) {
-                    score += tf/(tf+0.5+1.5*(lenD/avgDocLength))*Math.log((float)indexField.docCount()/(float)df);
+                    score += tf/(tf+0.5+1.5*((float)lenDoc/(float)avgDocLength))*Math.log10((float) indexField.docCount()/df);
                 }
             }
             return score;

@@ -22,7 +22,8 @@ public class UniLMJelinekMercerScoreScript extends AbstractSearchScript {
     ArrayList<String> terms = null;
 
     public static final String SCRIPT_NAME = "lm_jm_script";
-    private final double lambda = 0.6;
+    private final double lambda = 0.7;
+    private final long totalDocLen = 13950891;
 
     public UniLMJelinekMercerScoreScript(Map<String, Object> params) {
         params.entrySet();
@@ -38,15 +39,14 @@ public class UniLMJelinekMercerScoreScript extends AbstractSearchScript {
         try {
             double score = 0.0;
             IndexField indexField = indexLookup().get(field);
-            long V = indexField.sumttf();
-            long lenD = ((ScriptDocValues.Longs) doc().get("word_count")).getValue();
+            int lenDoc = ((ScriptDocValues.Strings)doc().get(field)).getValues().size();
 
             for (int i = 0; i < terms.size(); i++) {
                 IndexFieldTerm indexFieldTerm = indexField.get(terms.get(i));
                 int tf = indexFieldTerm.tf();
                 long cf = indexFieldTerm.ttf();
-                if (tf != 0) {
-                    score += Math.log(lambda*((float)tf/lenD)+(1-lambda)*((float)cf/V));
+                if(tf != 0 || cf != 0) {
+                    score += Math.log10(lambda * ((float) tf / (float) lenDoc) + (1 - lambda) * ((float) (cf - tf) / (float) (totalDocLen - lenDoc)));
                 }
             }
             return score;

@@ -23,7 +23,7 @@ public class UniLMLaplaceScoreScript extends AbstractSearchScript {
 
     public static final String SCRIPT_NAME = "lm_laplace_script";
 
-    private static final long V = 178304;
+    private static final long V = 178050;
 
     public UniLMLaplaceScoreScript(Map<String, Object> params) {
         params.entrySet();
@@ -40,14 +40,12 @@ public class UniLMLaplaceScoreScript extends AbstractSearchScript {
             float score = 0;
             IndexField indexField = indexLookup().get(field);
 
-            long lenD = ((ScriptDocValues.Longs) doc().get("word_count")).getValue();
+            int lenDoc = ((ScriptDocValues.Strings)doc().get(field)).getValues().size();
 
             for (int i = 0; i < terms.size(); i++) {
                 IndexFieldTerm indexFieldTerm = indexField.get(terms.get(i));
                 int tf = indexFieldTerm.tf();
-                if (tf != 0) {
-                    score += Math.log((float)(tf+1))/((float)(lenD+V));
-                }
+                score += Math.log10((float)(tf+1)/(float)(lenDoc+V));
             }
             return score;
         } catch (IOException ex) {
