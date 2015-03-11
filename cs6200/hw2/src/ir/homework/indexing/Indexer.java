@@ -20,11 +20,11 @@ public class Indexer {
     private HashMap<Integer, HashMap<Integer,List<Integer>>> docsIndex;
     private HashMap<Integer,String> docIdMap;
     private HashMap<Integer,Integer> docLengthMap;
+    private HashMap<Integer,Integer> termsCatalog;
 
     private List<String> stopList;
 
     private static int totalDocs = 0;
-    private static int totalDocLength = 0;
     private static Pattern pattern = Pattern.compile("\\w+(\\.?\\w+)*");
     private static QueryParser parser = new QueryParser("",new EnglishAnalyzer());
 
@@ -32,6 +32,7 @@ public class Indexer {
         termsMap = new HashMap<String,Integer>();
         docIdMap = new HashMap<Integer, String>();
         docLengthMap = new HashMap<Integer, Integer>();
+        termsCatalog = new HashMap<Integer, Integer>();
         docsIndex = new HashMap<Integer, HashMap<Integer, List<Integer>>>();
         setStopList();
     }
@@ -58,6 +59,7 @@ public class Indexer {
             File indexFile = new File("out/inverted_index");
             indexFile.createNewFile();
             FileOutputStream fos = new FileOutputStream(indexFile);
+            int lineNum = 0;
             for (Integer termId : docsIndex.keySet()) {
                 StringBuffer sb = new StringBuffer();
                 sb.append(termId);
@@ -71,6 +73,95 @@ public class Indexer {
                         sb.append(pos);
                     }
                 }
+                sb.append("\n");
+                fos.write(sb.toString().getBytes());
+                termsCatalog.put(termId,lineNum++);
+            }
+            fos.flush();
+            fos.close();
+        } catch (FileNotFoundException e){
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void saveDocId(){
+        try {
+            File file = new File("out/doc_id");
+            file.createNewFile();
+            FileOutputStream fos = new FileOutputStream(file);
+            for (Integer docId : docIdMap.keySet()) {
+                StringBuffer sb = new StringBuffer();
+                sb.append(docId);
+                sb.append(" ");
+                sb.append(docIdMap.get(docId));
+                sb.append("\n");
+                fos.write(sb.toString().getBytes());
+            }
+            fos.flush();
+            fos.close();
+        } catch (FileNotFoundException e){
+            e.printStackTrace();
+        } catch (IOException e) {
+             e.printStackTrace();
+        }
+    }
+
+    private void saveDocLength(){
+        try {
+            File file = new File("out/doc_length");
+            file.createNewFile();
+            FileOutputStream fos = new FileOutputStream(file);
+            for (Integer docId : docLengthMap.keySet()) {
+                StringBuffer sb = new StringBuffer();
+                sb.append(docId);
+                sb.append(" ");
+                sb.append(docLengthMap.get(docId));
+                sb.append("\n");
+                fos.write(sb.toString().getBytes());
+            }
+            fos.flush();
+            fos.close();
+        } catch (FileNotFoundException e){
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void saveTerms(){
+        try {
+            File file = new File("out/terms");
+            file.createNewFile();
+            FileOutputStream fos = new FileOutputStream(file);
+            for (String term : termsMap.keySet()) {
+                StringBuffer sb = new StringBuffer();
+                sb.append(term);
+                sb.append("&");
+                sb.append(termsMap.get(term));
+                sb.append("\n");
+                fos.write(sb.toString().getBytes());
+            }
+            fos.flush();
+            fos.close();
+        } catch (FileNotFoundException e){
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void saveTermsCatalog(){
+        try {
+            File file = new File("out/terms_catalog");
+            file.createNewFile();
+            FileOutputStream fos = new FileOutputStream(file);
+            for (Integer termId : termsCatalog.keySet()) {
+                StringBuffer sb = new StringBuffer();
+                sb.append(termId);
+                sb.append(" ");
+                sb.append(termsCatalog.get(termId));
                 sb.append("\n");
                 fos.write(sb.toString().getBytes());
             }
@@ -114,6 +205,10 @@ public class Indexer {
             buildIndexFromFile(file);
         }
         saveIndex();
+        saveDocId();
+        saveDocLength();
+        saveTerms();
+        saveTermsCatalog();
     }
 
     public void buildIndexFromFile(File file){
@@ -151,10 +246,9 @@ public class Indexer {
 
     public void newDocIndex(int id,String docNo,String text){
         HashMap<Integer, Integer> docIndex = updateTerms(text);
-        updateDocsIndex(id,docIndex);
+        updateDocsIndex(id, docIndex);
         docIdMap.put(id,docNo);
         docLengthMap.put(id,docIndex.size());
-        totalDocLength += docIndex.size();
     }
 
     public void updateDocsIndex(Integer id, HashMap<Integer, Integer> positions){
@@ -178,26 +272,6 @@ public class Indexer {
             docTermIndex.put(id,poss);
             docsIndex.put(term,docTermIndex);
         }
-    }
-
-    public int getTotalDocs(){
-        return totalDocs;
-    }
-    public int getTotalDocLength(){
-        return totalDocLength;
-    }
-
-    public HashMap<String,Integer> getTermsMap(){
-        return termsMap;
-    }
-    public HashMap<Integer, HashMap<Integer,List<Integer>>> getDocsIndex(){
-        return docsIndex;
-    }
-    public HashMap<Integer,String> getDocIdMap(){
-        return docIdMap;
-    }
-    public HashMap<Integer,Integer> getDocLengthMap(){
-        return docLengthMap;
     }
 
     public static void main(String[] args){

@@ -13,8 +13,17 @@ import java.util.*;
  * Created by Wei Luo on 3/3/15.
  */
 public class IndexClient {
+    
+    private HashMap<String,Integer> termsMap;
+    private HashMap<Integer, HashMap<Integer,List<Integer>>> docsIndex;
+    private HashMap<Integer,String> docIdMap;
+    private HashMap<Integer,Integer> docLengthMap;
+    private HashMap<Integer,Integer> termsCatalog;
 
-    private Indexer in;
+    private static int totalDocs = 0;
+    private static int totalDocLength = 0;
+
+    // models
     public static final String VSM = "TF_IDF";
     public static final String BM25 = "OKAPI_BM25";
     public static final String LM = "LM_LAPLACE";
@@ -25,11 +34,137 @@ public class IndexClient {
     private static final double k1 = 1.2;
     private static final int k2 = 100;
     // for proximity search
-    private static final int C = 1500;
+    private static final int C = 1000;
 
     public IndexClient(){
-        in = new Indexer();
-        in.buildIndexFromFiles();
+        docsIndex = new HashMap<Integer, HashMap<Integer, List<Integer>>>();
+        loadDocId();
+        loadDocLength();
+        loadTerms();
+        loadTermsCatalog();
+    }
+
+    private HashMap<Integer, List<Integer>> getDocsIndex(int termId){
+        if(! docsIndex.containsKey(termId)){
+            try{
+                File file = new File("out/inverted_index");
+                FileInputStream fis = new FileInputStream(file);
+                LineNumberReader lnr = new LineNumberReader(new InputStreamReader(fis));
+                while(lnr.getLineNumber()<termsCatalog.get(termId)){
+                    lnr.readLine();
+                }
+
+                String line = lnr.readLine();
+                if(!line.equals("")) {
+                    String[] docs = line.split("\t");
+                    HashMap<Integer, List<Integer>> termIndex = new HashMap<Integer, List<Integer>>();
+                    for(int i = 1;i < docs.length;i++){
+                        String[] positions = docs[i].split(" ");
+                        int docId = Integer.parseInt(positions[0]);
+                        List<Integer> poss = new ArrayList<Integer>();
+                        for(int j = 1;j < positions.length;j++){
+                            poss.add(Integer.parseInt(positions[j]));
+                        }
+                        termIndex.put(docId,poss);
+                    }
+                    docsIndex.put(termId,termIndex);
+                }
+                lnr.close();
+            } catch (IOException e){
+                e.printStackTrace();
+            }
+        }
+        return docsIndex.get(termId);
+    }
+
+    private void loadDocId(){
+        docIdMap = new HashMap<Integer, String>();
+        try {
+            File file = new File("out/doc_id");
+            FileInputStream fis = new FileInputStream(file);
+            BufferedReader br = new BufferedReader(new InputStreamReader(fis));
+            String line = br.readLine();
+            while (line != null) {
+                if(!line.equals("")) {
+                    String[] docs = line.split(" ");
+                    int docId = Integer.parseInt(docs[0]);
+                    String docNo = docs[1];
+                    docIdMap.put(docId, docNo);
+                }
+                line = br.readLine();
+            }
+            br.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void loadDocLength(){
+        docLengthMap = new HashMap<Integer, Integer>();
+        try {
+            File file = new File("out/doc_length");
+            FileInputStream fis = new FileInputStream(file);
+            BufferedReader br = new BufferedReader(new InputStreamReader(fis));
+            String line = br.readLine();
+            while (line != null) {
+                if(!line.equals("")) {
+                    String[] docs = line.split(" ");
+                    int docId = Integer.parseInt(docs[0]);
+                    int docLength = Integer.parseInt(docs[1]);
+                    docLengthMap.put(docId,docLength);
+                    totalDocs += 1;
+                    totalDocLength += docLength;
+                }
+                line = br.readLine();
+            }
+            br.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void loadTerms(){
+        termsMap = new HashMap<String, Integer>();
+        try {
+            File file = new File("out/terms");
+            FileInputStream fis = new FileInputStream(file);
+            BufferedReader br = new BufferedReader(new InputStreamReader(fis));
+            String line = br.readLine();
+            while (line != null) {
+                if(!line.equals("")) {
+                    String[] docs = line.split("&");
+                    String term = docs[0];
+                    int termId = Integer.parseInt(docs[1]);
+                    termsMap.put(term,termId);
+                }
+                line = br.readLine();
+            }
+            br.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void loadTermsCatalog(){
+        termsCatalog = new HashMap<Integer, Integer>();
+        try {
+            File file = new File("out/terms_catalog");
+            FileInputStream fis = new FileInputStream(file);
+            BufferedReader br = new BufferedReader(new InputStreamReader(fis));
+            String line = br.readLine();
+            while (line != null) {
+                if(!line.equals("")) {
+                    String[] docs = line.split(" ");
+                    int termId = Integer.parseInt(docs[0]);
+                    int lineNum = Integer.parseInt(docs[1]);
+                    termsCatalog.put(termId,lineNum);
+                }
+                line = br.readLine();
+            }
+            br.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     public static HashMap<String,String[]> parseQueries(File file){
@@ -69,7 +204,7 @@ public class IndexClient {
 
     public void executeQueries(HashMap<String,String[]> queries, String model){
         Iterator<String> keySetIterator = queries.keySet().iterator();
-        double[][] scores = new double[in.getTotalDocs()][2];
+        double[][] scores = new double[totalDocs][2];
         try {
             File indexFile = new File("out/"+model + ".txt");
             indexFile.createNewFile();
@@ -78,7 +213,7 @@ public class IndexClient {
             while (keySetIterator.hasNext()) {
                 String key = keySetIterator.next();
                 String[] terms = queries.get(key);
-                for (int i = 0; i < in.getTotalDocs(); i++) {
+                for (int i = 0; i < totalDocs; i++) {
                     scores[i][0] = i + 1;
                     if (model.equals(VSM)) {
                         scores[i][1] = tfIdfScore(i + 1, terms);
@@ -117,13 +252,14 @@ public class IndexClient {
     private void outputScores(String queryId,double[][] scores,FileOutputStream fos) {
         try {
             for (int i = 0; i < 100; i++) {
-                String out = queryId;
-                out += " Q0";
-                out += " " + in.getDocIdMap().get((int)scores[i][0]);
-                out += " " + (i+1);
-                out += " " + scores[i][1];
-                out += " Exp\n";
-                fos.write(out.getBytes());
+                StringBuffer sb = new StringBuffer();
+                sb.append(queryId);
+                sb.append(" Q0");
+                sb.append(" " + docIdMap.get((int)scores[i][0]));
+                sb.append(" " + (i+1));
+                sb.append(" " + scores[i][1]);
+                sb.append(" Exp\n");
+                fos.write(sb.toString().getBytes());
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -133,13 +269,13 @@ public class IndexClient {
     private double tfIdfScore(int docId, String[] terms) {
         double score = 0;
         for(String term : terms){
-            if(in.getTermsMap().containsKey(term)) {
-                int termId = in.getTermsMap().get(term);
-                if (in.getDocsIndex().get(termId).containsKey(docId)) {
-                    int tf = in.getDocsIndex().get(termId).get(docId).size();
-                    int df = in.getDocsIndex().get(termId).size();
-                    double avgDocLength = in.getTotalDocLength() / (double) in.getTotalDocs();
-                    score += tf / (tf + 0.5 + 1.5 * (in.getDocLengthMap().get(docId) / avgDocLength)) * Math.log10(in.getTotalDocs() / (double) df);
+            if(termsMap.containsKey(term)) {
+                int termId = termsMap.get(term);
+                if (getDocsIndex(termId).containsKey(docId)) {
+                    int tf = getDocsIndex(termId).get(docId).size();
+                    int df = getDocsIndex(termId).size();
+                    double avgDocLength = totalDocLength / (double) totalDocs;
+                    score += tf / (tf + 0.5 + 1.5 * (docLengthMap.get(docId) / avgDocLength)) * Math.log10(totalDocs / (double) df);
                 }
             }
         }
@@ -156,16 +292,16 @@ public class IndexClient {
             tfQuery.put(term,tfQuery.get(term)+1);
         }
         for(String term : terms){
-            if(in.getTermsMap().containsKey(term)) {
-                int termId = in.getTermsMap().get(term);
-                if (in.getDocsIndex().get(termId).containsKey(docId)) {
-                    int tf = in.getDocsIndex().get(termId).get(docId).size();
-                    int df = in.getDocsIndex().get(termId).size();
+            if(termsMap.containsKey(term)) {
+                int termId = termsMap.get(term);
+                if (getDocsIndex(termId).containsKey(docId)) {
+                    int tf = getDocsIndex(termId).get(docId).size();
+                    int df = getDocsIndex(termId).size();
                     int tfq = tfQuery.get(term);
-                    double avgDocLength = in.getTotalDocLength() / (double) in.getTotalDocs();
+                    double avgDocLength = totalDocLength / (double) totalDocs;
                     if(tf != 0){
-                        double log_term = Math.log10((in.getTotalDocs() + 0.5) / (df + 0.5));
-                        double k1_term = (tf+k1*tf)/(tf+k1*((1-b)+b*(in.getDocLengthMap().get(docId)/avgDocLength)));
+                        double log_term = Math.log10((totalDocs + 0.5) / (df + 0.5));
+                        double k1_term = (tf+k1*tf)/(tf+k1*((1-b)+b*(docLengthMap.get(docId)/avgDocLength)));
                         double k2_term = (tfq+k2*tfq)/(double)(tfq+k2);
                         score += log_term*k1_term*k2_term;
                     }
@@ -178,13 +314,13 @@ public class IndexClient {
     private double lmScore(int docId, String[] terms) {
         double score = 0;
         for(String term : terms){
-            if(in.getTermsMap().containsKey(term)) {
-                int termId = in.getTermsMap().get(term);
-                if (in.getDocsIndex().get(termId).containsKey(docId)) {
-                    int tf = in.getDocsIndex().get(termId).get(docId).size();
-                    score += Math.log10((tf+1)/(double)(in.getDocLengthMap().get(docId)+in.getTermsMap().size()));
+            if(termsMap.containsKey(term)) {
+                int termId = termsMap.get(term);
+                if (getDocsIndex(termId).containsKey(docId)) {
+                    int tf = getDocsIndex(termId).get(docId).size();
+                    score += Math.log10((tf+1)/(double)(docLengthMap.get(docId)+termsMap.size()));
                 } else {
-                    score += Math.log10(1.0/(double)(in.getDocLengthMap().get(docId)+in.getTermsMap().size()));
+                    score += Math.log10(1.0/(double)(docLengthMap.get(docId)+termsMap.size()));
                 }
             }
         }
@@ -193,18 +329,18 @@ public class IndexClient {
 
     private double proximitySearch(int docId, String[] terms){
         List<List<Integer>> termsPositions = new ArrayList<List<Integer>>();
-        int numContainTerms = 0;
         for(String term : terms){
-            if(in.getTermsMap().containsKey(term)) {
-                int termId = in.getTermsMap().get(term);
-                if (in.getDocsIndex().get(termId).containsKey(docId)) {
-                    termsPositions.add(in.getDocsIndex().get(termId).get(docId));
-                    numContainTerms += in.getDocsIndex().get(termId).get(docId).size();
+            if(termsMap.containsKey(term)) {
+                int termId = termsMap.get(term);
+                if (getDocsIndex(termId).containsKey(docId)) {
+                    termsPositions.add(getDocsIndex(termId).get(docId));
                 }
             }
         }
+        int numContainTerms = termsPositions.size();
         int rangeOfWindow = getMinSpan(termsPositions);
-        return (C - rangeOfWindow) * numContainTerms / ((double)(in.getDocLengthMap().get(docId)+in.getTermsMap().size()));
+        double proximity = (C - rangeOfWindow) * numContainTerms / ((double)(docLengthMap.get(docId)+termsMap.size()));
+        return proximity + tfIdfScore(docId,terms);
     }
 
     private int getMinSpan(List<List<Integer>> termsPositions) {
