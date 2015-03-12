@@ -13,7 +13,7 @@ import java.util.*;
  * Created by Wei Luo on 3/3/15.
  */
 public class IndexClient {
-    
+
     private HashMap<String,Integer> termsMap;
     private HashMap<Integer, HashMap<Integer,List<Integer>>> docsIndex;
     private HashMap<Integer,String> docIdMap;
@@ -339,8 +339,8 @@ public class IndexClient {
         }
         int numContainTerms = termsPositions.size();
         int rangeOfWindow = getMinSpan(termsPositions);
-        double proximity = (C - rangeOfWindow) * numContainTerms / ((double)(docLengthMap.get(docId)+termsMap.size()));
-        return proximity + tfIdfScore(docId,terms);
+        double proximity = Math.pow(0.8,(rangeOfWindow-numContainTerms)/(double)numContainTerms);//(C - rangeOfWindow) * numContainTerms / ((double)(docLengthMap.get(docId)+termsMap.size()));
+        return proximity + bm25Score(docId,terms);
     }
 
     private int getMinSpan(List<List<Integer>> termsPositions) {

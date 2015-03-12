@@ -17,10 +17,12 @@ import java.util.regex.Pattern;
 public class Indexer {
 
     private HashMap<String,Integer> termsMap;
-    private HashMap<Integer, HashMap<Integer,List<Integer>>> docsIndex;
     private HashMap<Integer,String> docIdMap;
     private HashMap<Integer,Integer> docLengthMap;
     private HashMap<Integer,Integer> termsCatalog;
+    private HashMap<Integer, HashMap<Integer,List<Integer>>> partDocsIndex;
+    private HashMap<Integer,List<Integer>> termsIndexFileMap;
+    private HashMap<Integer,HashMap<Integer,Integer>> termsFileCatalogs;
 
     private List<String> stopList;
 
@@ -33,7 +35,9 @@ public class Indexer {
         docIdMap = new HashMap<Integer, String>();
         docLengthMap = new HashMap<Integer, Integer>();
         termsCatalog = new HashMap<Integer, Integer>();
-        docsIndex = new HashMap<Integer, HashMap<Integer, List<Integer>>>();
+        partDocsIndex = new HashMap<Integer, HashMap<Integer, List<Integer>>>();
+        termsFileCatalogs = new HashMap<Integer, HashMap<Integer, Integer>>();
+        termsIndexFileMap = new HashMap<Integer, List<Integer>>();
         setStopList();
     }
 
@@ -54,16 +58,17 @@ public class Indexer {
         }
     }
 
-    private void saveIndex(){
+    private void savePartIndex(int partNum){
         try {
-            File indexFile = new File("out/inverted_index");
+            HashMap<Integer,Integer> termsPartCatalog = new HashMap<Integer, Integer>();
+            File indexFile = new File("out/temp/inverted_index_"+partNum);
             indexFile.createNewFile();
             FileOutputStream fos = new FileOutputStream(indexFile);
             int lineNum = 0;
-            for (Integer termId : docsIndex.keySet()) {
+            for (Integer termId : partDocsIndex.keySet()) {
                 StringBuffer sb = new StringBuffer();
                 sb.append(termId);
-                HashMap<Integer,List<Integer>> docTermIndex = docsIndex.get(termId);
+                HashMap<Integer,List<Integer>> docTermIndex = partDocsIndex.get(termId);
                 for(Integer docId: docTermIndex.keySet()){
                     sb.append("\t");
                     sb.append(docId);
@@ -75,8 +80,13 @@ public class Indexer {
                 }
                 sb.append("\n");
                 fos.write(sb.toString().getBytes());
-                termsCatalog.put(termId,lineNum++);
+
+                termsPartCatalog.put(termId,lineNum++);
+                List<Integer> fileIds = termsIndexFileMap.get(termId);
+                fileIds.add(partNum);
+                termsIndexFileMap.put(termId,fileIds);
             }
+            termsFileCatalogs.put(partNum,termsPartCatalog);
             fos.flush();
             fos.close();
         } catch (FileNotFoundException e){
@@ -186,6 +196,7 @@ public class Indexer {
                     if (!term.equals("") && pattern.matcher(word).find() && !stopList.contains(term)) {
                         if (!termsMap.containsKey(term)) {
                             termsMap.put(term, termsMap.size() + 1);
+                            termsIndexFileMap.put(termsMap.size(),new ArrayList<Integer>());
                         }
                         termPositions.put(position++, termsMap.get(term));
                     }
@@ -204,11 +215,46 @@ public class Indexer {
         for (File file : listOfFiles){
             buildIndexFromFile(file);
         }
-        saveIndex();
+        mergePartIndex();
         saveDocId();
         saveDocLength();
         saveTerms();
         saveTermsCatalog();
+    }
+
+    public void mergePartIndex(){
+        try {
+            File indexFile = new File("out/inverted_index");
+            indexFile.createNewFile();
+            FileOutputStream fos = new FileOutputStream(indexFile);
+            int lineNum = 0;
+            for (String term : termsMap.keySet()){
+                int termId = termsMap.get(term);
+                StringBuffer sb = new StringBuffer();
+                sb.append(termId);
+                List<Integer> files = termsIndexFileMap.get(termId);
+                for(int fileId :files){
+                    HashMap<Integer,Integer> catalog = termsFileCatalogs.get(fileId);
+                    File file = new File("out/temp/inverted_index_"+fileId);
+                    FileInputStream fis = new FileInputStream(file);
+                    LineNumberReader lnr = new LineNumberReader(new InputStreamReader(fis));
+                    while(lnr.getLineNumber() < catalog.get(termId)){
+                        lnr.readLine();
+                    }
+                    String line = lnr.readLine();
+                    String[] docs = line.split("\t");
+                    for(int i = 1;i < docs.length;i++){
+                        sb.append("\t");
+                        sb.append(docs[i]);
+                    }
+                }
+                sb.append("\n");
+                fos.write(sb.toString().getBytes());
+                termsCatalog.put(termId,lineNum++);
+            }
+        }  catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     public void buildIndexFromFile(File file){
@@ -231,6 +277,10 @@ public class Indexer {
                 } else if (line.startsWith("</TEXT>")) {
                     texting = false;
                 } else if (line.startsWith("</DOC>")) {
+                    if(totalDocs> 0 && totalDocs%1000==0){
+                        savePartIndex(totalDocs/1000);
+                        partDocsIndex = new HashMap<Integer, HashMap<Integer, List<Integer>>>();
+                    }
                     newDocIndex(totalDocs+++1, id, text);
                 }
                 if (texting && !line.startsWith("<TEXT>")){
@@ -256,8 +306,8 @@ public class Indexer {
             Integer term = positions.get(p);
 
             HashMap<Integer,List<Integer>> docTermIndex;
-            if(docsIndex.containsKey(term)) {
-                docTermIndex = docsIndex.get(term);
+            if(partDocsIndex.containsKey(term)) {
+                docTermIndex = partDocsIndex.get(term);
             } else {
                 docTermIndex = new HashMap<Integer, List<Integer>>();
             }
@@ -270,7 +320,7 @@ public class Indexer {
             }
             poss.add(p);
             docTermIndex.put(id,poss);
-            docsIndex.put(term,docTermIndex);
+            partDocsIndex.put(term,docTermIndex);
         }
     }
 
