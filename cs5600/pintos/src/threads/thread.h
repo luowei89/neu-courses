@@ -4,6 +4,7 @@
 #include <debug.h>
 #include <list.h>
 #include <stdint.h>
+#include "userprog/process.h"
 
 /* States in a thread's life cycle. */
 enum thread_status
@@ -11,18 +12,18 @@ enum thread_status
     THREAD_RUNNING,     /* Running thread. */
     THREAD_READY,       /* Not running but ready to run. */
     THREAD_BLOCKED,     /* Waiting for an event to trigger. */
-    THREAD_DYING        /* About to be destroyed. */
+    THREAD_DYING,       /* About to be destroyed. */
+    THREAD_SLEEPING		/* New state for sleeping threads*/
   };
 
 /* Thread identifier type.
    You can redefine this to whatever type you like. */
-typedef int tid_t;
 #define TID_ERROR ((tid_t) -1)          /* Error value for tid_t. */
 
 /* Thread priorities. */
 #define PRI_MIN 0                       /* Lowest priority. */
 #define PRI_DEFAULT 31                  /* Default priority. */
-#define PRI_MAX 63                      /* Highest priority. */
+#define PRI_MAX 63		                /* Highest priority. */
 
 /* A kernel thread or user process.
 
@@ -93,7 +94,27 @@ struct thread
     /* Shared between thread.c and synch.c. */
     struct list_elem elem;              /* List element. */
 
+    /* variables for project 1 */
+
+    int64_t wake_time;					/* the wake time for thread*/
+    int original_priority;				/* the original priority when the thread is created */
+	struct lock *waiting_lock;			/* the lock which the thread is waiting for */
+	struct list holding_locks;			/* a list of locks which the current thread is holding */
+
+    /* variables for project 1 */
+
 #ifdef USERPROG
+    /* variables for project 2 */
+
+    int fd;								/* file descriptor */
+    tid_t parent_tid;					/* parent thread's tid */
+    struct file *exec_file;				/* executable file */
+    struct process *process;			/* the process of the current thread */
+    struct list subprocesses;			/* subprocesses of the current thread */
+    struct list opened_files;			/* the list of files opened by this thread */
+
+    /* variables for project 2 */
+
     /* Owned by userprog/process.c. */
     uint32_t *pagedir;                  /* Page directory. */
 #endif
@@ -130,6 +151,9 @@ void thread_yield (void);
 typedef void thread_action_func (struct thread *t, void *aux);
 void thread_foreach (thread_action_func *, void *);
 
+bool compare_priority(const struct list_elem *a, const struct list_elem *b,
+		void *aux UNUSED);
+int get_max_lock_priority();
 int thread_get_priority (void);
 void thread_set_priority (int);
 
