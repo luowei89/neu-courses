@@ -5,7 +5,8 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 
 /**
- * Created by luowei on 3/18/15.
+ * Information Retrieval Homework
+ * Created by Wei Luo on 3/18/15.
  */
 public class Frontier {
     private HashMap<Integer,Set<String>> frontier;
