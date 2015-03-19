@@ -18,15 +18,22 @@ import java.util.Set;
  * Created by Wei Luo on 3/18/15.
  */
 public class Crawler {
+
+    public static final String KEYWORD = "September 11"; // 9/11
+    public static final int MAX_DOCS = 100;
+    public static final long POLITENESS = 1000;
     public static final String[] SEEDS = {
-            "http://en.wikipedia.org/wiki/List_of_terrorist_incidents",
+            "http://september11.archive.org/",
+            "http://pentagon.spacelist.org/",
+            "http://www.911research.wtc7.net/",
             "http://en.wikipedia.org/wiki/September_11_attacks",
+            "http://en.wikipedia.org/wiki/Collapse_of_the_World_Trade_Center",
+            "http://en.wikipedia.org/wiki/United_Airlines_Flight_93",
             "http://en.wikipedia.org/wiki/American_Airlines_Flight_77",
-            "http://en.wikipedia.org/wiki/World_Trade_Center",
-            "http://en.wikipedia.org/wiki/Collapse_of_the_World_Trade_Center"
+            "http://en.wikipedia.org/wiki/List_of_terrorist_incidents",
+            "http://en.wikipedia.org/wiki/The_Pentagon",
+            "http://en.wikipedia.org/wiki/World_Trade_Center"
     };
-    public static final String KEYWORD = "terrorism";
-    public static final int MAX_DOCS = 500;
 
     private Frontier frontier;
     private Set<String> crawled;
@@ -41,37 +48,52 @@ public class Crawler {
 
     public void crawl(){
         while(!frontier.empty() && crawled.size() < MAX_DOCS){
+            long startTime = System.currentTimeMillis();
             String url = frontier.next();
             Set<String> newUrls = getLinksFromURL(url);
-            if(newUrls != null) {
+            if(newUrls != null && newUrls.size() > 0) {
                 System.out.println("Crawling "+url);
+                crawled.add(url);
                 for (String nu : newUrls) {
                     if(!crawled.contains(nu)) {
                         frontier.add(nu);
                     }
                 }
-                crawled.add(url);
+            }
+            // wait until 1 second to process next crawl (politeness policy)
+            try {
+                long crawlTime = System.currentTimeMillis() - startTime;
+                if(crawlTime < POLITENESS){
+                    Thread.sleep(POLITENESS-crawlTime);
+                }
+            } catch (InterruptedException e) {
+                e.printStackTrace();
             }
         }
         System.out.println("Documents crawled: " + crawled.size());
     }
 
-    public static Set<String> getLinksFromURL(String url) {
+    protected Set<String> getLinksFromURL(String url) {
         Set<String> urls = new HashSet<String>();
         try {
-            Document doc = Jsoup.connect(url).get();
+            Document doc = Jsoup.connect(url).userAgent("Chrome").get();
             if (!doc.html().contains(KEYWORD)) {
                 // no need to crawl
                 return null;
             }
-            Elements newsHeadlines = doc.select("a[href]");
+            Elements newsHeadlines = doc.select("div#content ul a[href],div#content p a[href]");
+            if(newsHeadlines.size() == 0){
+                newsHeadlines = doc.select("div.content ul a[href],div.content p a[href]");
+            }
+            if(newsHeadlines.size() == 0){
+                newsHeadlines = doc.select("ul a[href],p a[href]");
+            }
             for (Element link : newsHeadlines) {
                 String linkURL = canonicalizeURL(link.attr("abs:href"));
-                if(linkURL != null) {
+                if(linkURL != null && !linkURL.endsWith(".png") && !linkURL.endsWith(".svg")) {
                     urls.add(linkURL);
                 }
             }
-
         } catch (IOException e) {
             // url could not be opened
             return null;
@@ -79,8 +101,11 @@ public class Crawler {
         return urls;
     }
 
-    private static String canonicalizeURL(String url){
+    protected String canonicalizeURL(String url){
         try {
+            if(url.contains("mailto:") ||url.contains("/wiki/Category:")){
+                return null;
+            }
             URL curl = new URL(url);
             // Convert the scheme and host to lower case
             String protocol = curl.getProtocol().toLowerCase();
