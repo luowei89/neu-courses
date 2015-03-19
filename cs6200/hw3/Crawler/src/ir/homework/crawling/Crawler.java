@@ -1,15 +1,6 @@
 package ir.homework.crawling;
 
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
-import org.jsoup.select.Elements;
-
 import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -36,10 +27,12 @@ public class Crawler {
     };
 
     private Frontier frontier;
+    private Indexer indexer;
     private Set<String> crawled;
 
     public Crawler(){
         frontier = new Frontier();
+        indexer = new Indexer();
         for(String s : SEEDS){
             frontier.add(s);
         }
@@ -50,7 +43,7 @@ public class Crawler {
         while(!frontier.empty() && crawled.size() < MAX_DOCS){
             long startTime = System.currentTimeMillis();
             String url = frontier.next();
-            Set<String> newUrls = getLinksFromURL(url);
+            Set<String> newUrls = crawlAndIndex(url);
             if(newUrls != null && newUrls.size() > 0) {
                 System.out.println("Crawling "+url);
                 crawled.add(url);
@@ -73,68 +66,25 @@ public class Crawler {
         System.out.println("Documents crawled: " + crawled.size());
     }
 
-    protected Set<String> getLinksFromURL(String url) {
-        Set<String> urls = new HashSet<String>();
+    protected Set<String> crawlAndIndex(String url) {
+        ESElement ese;
         try {
-            Document doc = Jsoup.connect(url).userAgent("Chrome").get();
-            if (!doc.html().contains(KEYWORD)) {
-                // no need to crawl
-                return null;
-            }
-            Elements newsHeadlines = doc.select("div#content ul a[href],div#content p a[href]");
-            if(newsHeadlines.size() == 0){
-                newsHeadlines = doc.select("div.content ul a[href],div.content p a[href]");
-            }
-            if(newsHeadlines.size() == 0){
-                newsHeadlines = doc.select("ul a[href],p a[href]");
-            }
-            for (Element link : newsHeadlines) {
-                String linkURL = canonicalizeURL(link.attr("abs:href"));
-                if(linkURL != null && !linkURL.endsWith(".png") && !linkURL.endsWith(".svg")) {
-                    urls.add(linkURL);
-                }
-            }
+            ese = new ESElement(url);
+            indexer.buildIndex(ese);
         } catch (IOException e) {
             // url could not be opened
             return null;
         }
-        return urls;
+        return ese.getOutlinks();
     }
 
-    protected String canonicalizeURL(String url){
-        try {
-            if(url.contains("mailto:") ||url.contains("/wiki/Category:")){
-                return null;
-            }
-            URL curl = new URL(url);
-            // Convert the scheme and host to lower case
-            String protocol = curl.getProtocol().toLowerCase();
-            String host = curl.getHost().toLowerCase();
-            // Remove port 80 from http URLs, and port 443 from HTTPS URLs
-            int port = curl.getPort();
-            if (port == curl.getDefaultPort()) {
-                port = -1;
-            }
-            String path = curl.getPath();
-            path = new URI(path).normalize().toString();
-            // Remove duplicate slashes
-            while (path.contains("//")) {
-                path = path.replace("//", "/");
-            }
-            path = path.trim();
-            url = new URL(protocol, host, port, path).toString();
-        } catch (MalformedURLException e) {
-            // url could not be parsed
-            return null;
-        } catch (URISyntaxException e) {
-            // url could not be parsed
-            return null;
-        }
-        return url;
+    public void closeConnections() {
+        indexer.close();
     }
 
     public static void main(String[] args){
         Crawler crawler = new Crawler();
         crawler.crawl();
+        crawler.closeConnections();
     }
 }
