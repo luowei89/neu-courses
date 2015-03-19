@@ -66,40 +66,45 @@ public class Crawler {
             }
             Elements newsHeadlines = doc.select("a[href]");
             for (Element link : newsHeadlines) {
-                String linkURL = link.attr("abs:href");
-                urls.add(canonicalizeURL(linkURL));
+                String linkURL = canonicalizeURL(link.attr("abs:href"));
+                if(linkURL != null) {
+                    urls.add(linkURL);
+                }
             }
 
         } catch (IOException e) {
-            // url could not be opened
-            return null;
-        } catch (URISyntaxException e){
             // url could not be opened
             return null;
         }
         return urls;
     }
 
-    private static String canonicalizeURL(String url) throws URISyntaxException, MalformedURLException {
-
-        URL curl = new URL(url);
-        // Convert the scheme and host to lower case
-        String protocol = curl.getProtocol().toLowerCase();
-        String host = curl.getHost().toLowerCase();
-        // Remove port 80 from http URLs, and port 443 from HTTPS URLs
-        int port = curl.getPort();
-        if (port == curl.getDefaultPort()) {
-            port = -1;
+    private static String canonicalizeURL(String url){
+        try {
+            URL curl = new URL(url);
+            // Convert the scheme and host to lower case
+            String protocol = curl.getProtocol().toLowerCase();
+            String host = curl.getHost().toLowerCase();
+            // Remove port 80 from http URLs, and port 443 from HTTPS URLs
+            int port = curl.getPort();
+            if (port == curl.getDefaultPort()) {
+                port = -1;
+            }
+            String path = curl.getPath();
+            path = new URI(path).normalize().toString();
+            // Remove duplicate slashes
+            while (path.contains("//")) {
+                path = path.replace("//", "/");
+            }
+            path = path.trim();
+            url = new URL(protocol, host, port, path).toString();
+        } catch (MalformedURLException e) {
+            // url could not be parsed
+            return null;
+        } catch (URISyntaxException e) {
+            // url could not be parsed
+            return null;
         }
-        String path = curl.getPath();
-        path = new URI(path).normalize().toString();
-        // Remove duplicate slashes
-        while(path.contains("//")){
-            path = path.replace("//","/");
-        }
-        path = path.trim();
-        url = new URL(protocol, host, port, path).toString();
-
         return url;
     }
 
