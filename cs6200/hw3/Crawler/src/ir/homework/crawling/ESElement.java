@@ -26,14 +26,14 @@ public class ESElement {
     private Set<String> inlinks; // inlinks list (canonical URLs)
     private Set<String> outlinks; // outlinks list (canonical URLs)
 
-    public ESElement(String url) throws IOException {
+    public ESElement(String url,Set<String> inlnks) throws IOException {
         id = url;
         text = "";
-        inlinks = new HashSet<String>();
+        inlinks = inlnks;
         outlinks = new HashSet<String>();
         Document doc = Jsoup.connect(url).userAgent("Chrome").get();
         html = doc.html();
-        if (!doc.html().contains(Crawler.KEYWORD)) {
+        if (!(html.contains(Crawler.KEYWORDS[0])&&html.contains(Crawler.KEYWORDS[1]))) {
             // no need to crawl
             throw new IOException();
         }
@@ -113,5 +113,9 @@ public class ESElement {
 
     public Set<String> getOutlinks() {
         return outlinks;
+    }
+
+    public String getId() {
+        return id;
     }
 }

@@ -10,8 +10,8 @@ import java.util.Set;
  */
 public class Crawler {
 
-    public static final String KEYWORD = "September 11"; // 9/11
-    public static final int MAX_DOCS = 100;
+    public static final String[] KEYWORDS = {"September 11","terror"}; // 9/11 terrorism terrorist
+    public static final int MAX_DOCS = 30000;
     public static final long POLITENESS = 1000;
     public static final String[] SEEDS = {
             "http://september11.archive.org/",
@@ -34,7 +34,7 @@ public class Crawler {
         frontier = new Frontier();
         indexer = new Indexer();
         for(String s : SEEDS){
-            frontier.add(s);
+            frontier.add(s,null);
         }
         crawled = new HashSet<String>();
     }
@@ -43,13 +43,16 @@ public class Crawler {
         while(!frontier.empty() && crawled.size() < MAX_DOCS){
             long startTime = System.currentTimeMillis();
             String url = frontier.next();
-            Set<String> newUrls = crawlAndIndex(url);
+            Set<String> inlinks = frontier.getInlinks(url);
+            Set<String> newUrls = crawlAndIndex(url,inlinks);
             if(newUrls != null && newUrls.size() > 0) {
                 System.out.println("Crawling "+url);
                 crawled.add(url);
                 for (String nu : newUrls) {
                     if(!crawled.contains(nu)) {
-                        frontier.add(nu);
+                        frontier.add(nu,url);
+                    } else {
+                        indexer.updateInlinks(nu, url);
                     }
                 }
             }
@@ -66,10 +69,10 @@ public class Crawler {
         System.out.println("Documents crawled: " + crawled.size());
     }
 
-    protected Set<String> crawlAndIndex(String url) {
+    protected Set<String> crawlAndIndex(String url,Set<String> inlinks) {
         ESElement ese;
         try {
-            ese = new ESElement(url);
+            ese = new ESElement(url, inlinks);
             indexer.buildIndex(ese);
         } catch (IOException e) {
             // url could not be opened

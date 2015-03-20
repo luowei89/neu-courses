@@ -1,6 +1,7 @@
 package ir.homework.crawling;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
@@ -11,11 +12,13 @@ import java.util.Set;
 public class Frontier {
     private HashMap<Integer,Set<String>> frontier;
     private HashMap<String,Integer> urlsMap;
+    private HashMap<String,Set<String>> inlinksMap;
     private int maxCount;
 
     public Frontier(){
         frontier = new HashMap<Integer, Set<String>>();
         urlsMap = new HashMap<String, Integer>();
+        inlinksMap = new HashMap<String, Set<String>>();
         maxCount = 0;
     }
 
@@ -42,18 +45,31 @@ public class Frontier {
         return next;
     }
 
+    public Set<String> getInlinks(String url){
+        Set<String> inlinks = inlinksMap.get(url);
+        inlinksMap.remove(url);
+        if(inlinks == null){
+            inlinks = new HashSet<String>();
+        }
+        return inlinks;
+    }
+
     public boolean empty(){
         return maxCount == 0;
     }
 
     // add a new url to the frontier
-    public void add(String url){
+    public void add(String url, String inlink){
         int level = 0;
         Set<String> oldList;
         Set<String> newList;
+        Set<String> inlinks;
         if(urlsMap.containsKey(url)){
             // get the level from frontier
             level = urlsMap.get(url);
+            inlinks = inlinksMap.get(url);
+        } else {
+            inlinks = new HashSet<String>();
         }
         if(level > 0){
             // remove it from old level list
@@ -73,5 +89,9 @@ public class Frontier {
         frontier.put(level+1,newList);
         // update its level
         urlsMap.put(url,level+1);
+        if(inlink != null) {
+            inlinks.add(inlink);
+        }
+        inlinksMap.put(url, inlinks);
     }
 }
