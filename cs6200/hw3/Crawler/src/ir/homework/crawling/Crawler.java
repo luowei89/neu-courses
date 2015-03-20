@@ -46,8 +46,8 @@ public class Crawler {
             Set<String> inlinks = frontier.getInlinks(url);
             Set<String> newUrls = crawlAndIndex(url,inlinks);
             if(newUrls != null && newUrls.size() > 0) {
-                System.out.println("Crawling "+url);
                 crawled.add(url);
+                System.out.println("Crawling "+crawled.size()+"\t\t"+url);
                 for (String nu : newUrls) {
                     if(!crawled.contains(nu)) {
                         frontier.add(nu,url);
