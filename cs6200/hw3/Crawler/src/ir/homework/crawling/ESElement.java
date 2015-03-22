@@ -8,9 +8,7 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.HashSet;
 import java.util.Set;
@@ -26,7 +24,7 @@ public class ESElement {
     private Set<String> inlinks; // inlinks list (canonical URLs)
     private Set<String> outlinks; // outlinks list (canonical URLs)
 
-    public ESElement(String url,Set<String> inlnks) throws IOException {
+    public ESElement(String url,Set<String> inlnks) throws Exception {
         id = url;
         text = "";
         inlinks = inlnks;
@@ -35,7 +33,7 @@ public class ESElement {
         html = doc.html();
         if (!(html.contains(Crawler.KEYWORDS[0])&&html.contains(Crawler.KEYWORDS[1]))) {
             // no need to crawl
-            throw new IOException();
+            throw new Exception();
         }
         Elements newsHeadlines = doc.select("div#content ul a[href],div#content p a[href]");
         if(newsHeadlines.size() == 0){
@@ -84,10 +82,7 @@ public class ESElement {
             }
             path = path.trim();
             url = new URL(protocol, host, port, path).toString();
-        } catch (MalformedURLException e) {
-            // url could not be parsed
-            return null;
-        } catch (URISyntaxException e) {
+        } catch (Exception e) {
             // url could not be parsed
             return null;
         }

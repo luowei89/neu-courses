@@ -30,6 +30,8 @@ public class Crawler {
     private Indexer indexer;
     private Set<String> crawled;
 
+    private MultiThreadCrawler[] crawlers;
+
     public Crawler(){
         frontier = new Frontier();
         indexer = new Indexer();
@@ -37,48 +39,17 @@ public class Crawler {
             frontier.add(s,null);
         }
         crawled = new HashSet<String>();
+        crawlers = new MultiThreadCrawler[10];
+        for(int i = 0; i < crawlers.length; i++){
+            crawlers[i] = new MultiThreadCrawler();
+        }
     }
 
     public void crawl(){
-        while(!frontier.empty() && crawled.size() < MAX_DOCS){
-            long startTime = System.currentTimeMillis();
-            String url = frontier.next();
-            Set<String> inlinks = frontier.getInlinks(url);
-            Set<String> newUrls = crawlAndIndex(url,inlinks);
-            if(newUrls != null && newUrls.size() > 0) {
-                crawled.add(url);
-                System.out.println("Crawling "+crawled.size()+"\t\t"+url);
-                for (String nu : newUrls) {
-                    if(!crawled.contains(nu)) {
-                        frontier.add(nu,url);
-                    } else {
-                        indexer.updateInlinks(nu, url);
-                    }
-                }
-            }
-            // wait until 1 second to process next crawl (politeness policy)
-            try {
-                long crawlTime = System.currentTimeMillis() - startTime;
-                if(crawlTime < POLITENESS){
-                    Thread.sleep(POLITENESS-crawlTime);
-                }
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
+        for(int i = 0; i < crawlers.length; i++){
+            crawlers[i].run();
         }
         System.out.println("Documents crawled: " + crawled.size());
-    }
-
-    protected Set<String> crawlAndIndex(String url,Set<String> inlinks) {
-        ESElement ese;
-        try {
-            ese = new ESElement(url, inlinks);
-            indexer.buildIndex(ese);
-        } catch (IOException e) {
-            // url could not be opened
-            return null;
-        }
-        return ese.getOutlinks();
     }
 
     public void closeConnections() {
@@ -89,5 +60,35 @@ public class Crawler {
         Crawler crawler = new Crawler();
         crawler.crawl();
         crawler.closeConnections();
+    }
+
+    public class MultiThreadCrawler implements Runnable{
+
+        @Override
+        public void run() {
+            while (!frontier.empty() && crawled.size() < MAX_DOCS) {
+                try {
+                    String url = frontier.next();
+                    Set<String> inlinks = frontier.getInlinks(url);
+                    ESElement ese = new ESElement(url, inlinks);
+                    Set<String> newUrls = ese.getOutlinks();
+                    if (newUrls.size() > 0) {
+                        indexer.buildIndex(ese);
+                        crawled.add(url);
+                        System.out.println("Crawling " + crawled.size() + "\t\t" + url);
+                        for (String nu : newUrls) {
+                            if (!crawled.contains(nu)) {
+                                frontier.add(nu, url);
+                            } else {
+                                indexer.updateInlinks(nu, url);
+                            }
+                        }
+                    }
+                } catch (Exception e) {
+                    // failed analyze url continue to next
+                    // e.printStackTrace();
+                }
+            }
+        }
     }
 }
