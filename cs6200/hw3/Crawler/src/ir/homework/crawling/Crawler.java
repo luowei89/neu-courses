@@ -41,13 +41,20 @@ public class Crawler {
         crawled = new HashSet<String>();
         crawlers = new MultiThreadCrawler[10];
         for(int i = 0; i < crawlers.length; i++){
-            crawlers[i] = new MultiThreadCrawler();
+            crawlers[i] = new MultiThreadCrawler(i);
         }
     }
 
     public void crawl(){
         for(int i = 0; i < crawlers.length; i++){
-            crawlers[i].run();
+            crawlers[i].start();
+        }
+        try {
+            for (int i = 0; i < crawlers.length; i++) {
+                crawlers[i].join();
+            }
+        } catch (InterruptedException e) {
+            e.printStackTrace();
         }
         System.out.println("Documents crawled: " + crawled.size());
     }
@@ -64,6 +71,25 @@ public class Crawler {
 
     public class MultiThreadCrawler implements Runnable{
 
+        private int id;
+        private Thread t;
+
+        public MultiThreadCrawler(int i){
+            System.out.println(i);
+            id = i;
+        }
+
+        public void start(){
+            if (t == null){
+                t = new Thread(this);
+                t.start ();
+            }
+        }
+
+        public void join() throws InterruptedException {
+            t.join();
+        }
+
         @Override
         public void run() {
             while (!frontier.empty() && crawled.size() < MAX_DOCS) {
@@ -75,7 +101,7 @@ public class Crawler {
                     if (newUrls.size() > 0) {
                         indexer.buildIndex(ese);
                         crawled.add(url);
-                        System.out.println("Crawling " + crawled.size() + "\t\t" + url);
+                        System.out.println("Thread\t"+ id +" Crawling " + crawled.size() + "\t" + url);
                         for (String nu : newUrls) {
                             if (!crawled.contains(nu)) {
                                 frontier.add(nu, url);
