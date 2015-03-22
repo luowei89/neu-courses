@@ -14,50 +14,44 @@ public class Frontier {
     private HashMap<String,Integer> urlsMap;
     private HashMap<String,Set<String>> inlinksMap;
     private int maxCount;
-    private final Object lock;
 
     public Frontier(){
         frontier = new HashMap<Integer, Set<String>>();
         urlsMap = new HashMap<String, Integer>();
         inlinksMap = new HashMap<String, Set<String>>();
         maxCount = 0;
-        lock = new Object();
     }
 
     // get the next url to be crawled in the frontier
     public String next(){
-        synchronized (lock) {
-            if (empty()) {
-                return "Frontier Empty!";
-            }
-            Set<String> list = frontier.get(maxCount);
-            if (list.size() == 0) {
-                frontier.remove(maxCount);
-                maxCount--;
-                return next();
-            }
-            String next = list.iterator().next();
-            urlsMap.remove(next);
-            list.remove(next);
-            if (list.size() == 0) {
-                frontier.remove(maxCount);
-                maxCount--;
-            } else {
-                frontier.put(maxCount, list);
-            }
-            return next;
+        if (empty()) {
+            return "Frontier Empty!";
         }
+        Set<String> list = frontier.get(maxCount);
+        if (list.size() == 0) {
+            frontier.remove(maxCount);
+            maxCount--;
+            return next();
+        }
+        String next = list.iterator().next();
+        urlsMap.remove(next);
+        list.remove(next);
+        if (list.size() == 0) {
+            frontier.remove(maxCount);
+            maxCount--;
+        } else {
+            frontier.put(maxCount, list);
+        }
+        return next;
     }
 
     public Set<String> getInlinks(String url){
-        synchronized (lock) {
-            Set<String> inlinks = inlinksMap.get(url);
-            inlinksMap.remove(url);
-            if (inlinks == null) {
-                inlinks = new HashSet<String>();
-            }
-            return inlinks;
+        Set<String> inlinks = inlinksMap.get(url);
+        inlinksMap.remove(url);
+        if (inlinks == null) {
+            inlinks = new HashSet<String>();
         }
+        return inlinks;
     }
 
     public boolean empty(){
@@ -66,40 +60,38 @@ public class Frontier {
 
     // add a new url to the frontier
     public void add(String url, String inlink) {
-        synchronized (lock) {
-            int level = 0;
-            Set<String> oldList;
-            Set<String> newList;
-            Set<String> inlinks;
-            if (urlsMap.containsKey(url)) {
-                // get the level from frontier
-                level = urlsMap.get(url);
-                inlinks = inlinksMap.get(url);
-            } else {
-                inlinks = new HashSet<String>();
-            }
-            if (level > 0) {
-                // remove it from old level list
-                oldList = frontier.get(level);
-                oldList.remove(url);
-                frontier.put(level, oldList);
-            }
-            // get the new level list
-            if (frontier.containsKey(level + 1)) {
-                newList = frontier.get(level + 1);
-            } else {
-                newList = new LinkedHashSet<String>();
-                maxCount++;
-            }
-            // add it to the new level list
-            newList.add(url);
-            frontier.put(level + 1, newList);
-            // update its level
-            urlsMap.put(url, level + 1);
-            if (inlink != null) {
-                inlinks.add(inlink);
-            }
-            inlinksMap.put(url, inlinks);
+        int level = 0;
+        Set<String> oldList;
+        Set<String> newList;
+        Set<String> inlinks;
+        if (urlsMap.containsKey(url)) {
+            // get the level from frontier
+            level = urlsMap.get(url);
+            inlinks = inlinksMap.get(url);
+        } else {
+            inlinks = new HashSet<String>();
         }
+        if (level > 0) {
+            // remove it from old level list
+            oldList = frontier.get(level);
+            oldList.remove(url);
+            frontier.put(level, oldList);
+        }
+        // get the new level list
+        if (frontier.containsKey(level + 1)) {
+            newList = frontier.get(level + 1);
+        } else {
+            newList = new LinkedHashSet<String>();
+            maxCount++;
+        }
+        // add it to the new level list
+        newList.add(url);
+        frontier.put(level + 1, newList);
+        // update its level
+        urlsMap.put(url, level + 1);
+        if (inlink != null) {
+            inlinks.add(inlink);
+        }
+        inlinksMap.put(url, inlinks);
     }
 }
