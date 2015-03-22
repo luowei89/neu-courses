@@ -30,11 +30,11 @@ public class Indexer extends Thread {
         taskQueue = new ConcurrentLinkedQueue<Runnable>();
         running = true;
         its = new IndexerThread[5];
-
     }
 
     public void startIndexer(){
         for(int i = 0; i < its.length; i++){
+            its[i] = new IndexerThread();
             its[i].start();
         }
     }
@@ -107,11 +107,22 @@ public class Indexer extends Thread {
 
         @Override
         public void run() {
-            client.prepareUpdate("crawler_data","document",""+docIdMap.get(url))
-                    .addScriptParam("new_inlink", inlink)
-                    .setScript("ctx._source.inlinks += new_inlink", ScriptService.ScriptType.INLINE)
-                    .execute()
-                    .actionGet();
+            try {
+                // wait in case update conflict with create
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            if(docIdMap.containsKey(url)) {
+                client.prepareUpdate("crawler_data", "document", "" + docIdMap.get(url))
+                        .addScriptParam("new_inlink", inlink)
+                        .setScript("ctx._source.inlinks += new_inlink", ScriptService.ScriptType.INLINE)
+                        .execute()
+                        .actionGet();
+            } else {
+                // got executed before the index creation, put the task back to task queue
+                taskQueue.add(this);
+            }
         }
     }
 }
