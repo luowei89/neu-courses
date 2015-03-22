@@ -20,6 +20,7 @@ public class Indexer extends Thread {
     private HashMap<String,Integer> docIdMap;
     ConcurrentLinkedQueue<Runnable> taskQueue;
     private boolean running;
+    private IndexerThread[] its;
 
     public Indexer(){
         id = 1;
@@ -28,17 +29,23 @@ public class Indexer extends Thread {
         docIdMap = new HashMap<String, Integer>();
         taskQueue = new ConcurrentLinkedQueue<Runnable>();
         running = true;
+        its = new IndexerThread[5];
+
     }
 
     public void startIndexer(){
-        this.start();
+        for(int i = 0; i < its.length; i++){
+            its[i].start();
+        }
     }
 
     public void stopIndexer(){
         running = false;
         node.close();
         try {
-            this.join();
+            for(int i = 0; i < its.length; i++){
+                its[i].join();
+            }
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
@@ -54,14 +61,17 @@ public class Indexer extends Thread {
         taskQueue.add(task);
     }
 
-    @Override
-    public void run() {
-        Runnable task = taskQueue.poll();
-        while (running || task != null) {
-            if (task != null){
-                task.run();
+    private class IndexerThread extends Thread {
+
+        @Override
+        public void run() {
+            Runnable task = taskQueue.poll();
+            while (running || task != null) {
+                if (task != null){
+                    task.run();
+                }
+                task = taskQueue.poll();
             }
-            task = taskQueue.poll();
         }
     }
 
@@ -76,7 +86,7 @@ public class Indexer extends Thread {
         @Override
         public void run() {
             XContentBuilder builder = ese.getBuilder();
-            client.prepareIndex("crawler_data_1", "document", ""+id)
+            client.prepareIndex("crawler_data", "document", ""+id)
                     .setSource(builder)
                     .execute()
                     .actionGet();
@@ -97,7 +107,7 @@ public class Indexer extends Thread {
 
         @Override
         public void run() {
-            client.prepareUpdate("crawler_data_1","document",""+docIdMap.get(url))
+            client.prepareUpdate("crawler_data","document",""+docIdMap.get(url))
                     .addScriptParam("new_inlink", inlink)
                     .setScript("ctx._source.inlinks += new_inlink", ScriptService.ScriptType.INLINE)
                     .execute()

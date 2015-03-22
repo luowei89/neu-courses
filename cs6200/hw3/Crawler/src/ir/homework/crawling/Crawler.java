@@ -14,7 +14,7 @@ public class Crawler {
 
     public static final String[] KEYWORDS = {"September 11","terror"}; // 9/11 terrorism terrorist
     public static final int MAX_DOCS = 30000;
-    public static final long POLITENESS = 100;
+    public static final long POLITENESS = 1000;
     public static final String[] SEEDS = {
             "http://september11.archive.org/",
             "http://pentagon.spacelist.org/",
