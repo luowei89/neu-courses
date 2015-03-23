@@ -12,9 +12,9 @@ import java.util.Set;
  */
 public class Crawler {
 
-    public static final String[] KEYWORDS = {"September 11","terror"}; // 9/11 terrorism terrorist
-    public static final int MAX_DOCS = 30000;
-    public static final long POLITENESS = 1000;
+    public static final String KEYWORD = "terror"; // 9/11 terrorism terrorist
+    public static final int MAX_DOCS = 12000;
+    public static final long POLITENESS = 200;
     public static final String[] SEEDS = {
             "http://september11.archive.org/",
             "http://pentagon.spacelist.org/",
@@ -102,9 +102,11 @@ public class Crawler {
     }
 
     public static void main(String[] args){
+        long time = System.currentTimeMillis();
         Crawler crawler = new Crawler();
         crawler.startIndexer();
         crawler.crawl();
         crawler.stopIndexer();
+        System.out.println((System.currentTimeMillis()-time)/1000.0/60.0/60.0+" hours.");
     }
 }

@@ -31,7 +31,7 @@ public class ESElement {
         outlinks = new HashSet<String>();
         Document doc = Jsoup.connect(url).userAgent("Chrome").get();
         html = doc.html();
-        if (!(html.contains(Crawler.KEYWORDS[0])&&html.contains(Crawler.KEYWORDS[1]))) {
+        if (!(html.contains(Crawler.KEYWORD))) {
             // no need to crawl
             throw new Exception();
         }
