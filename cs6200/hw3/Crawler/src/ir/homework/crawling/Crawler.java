@@ -13,7 +13,7 @@ import java.util.Set;
 public class Crawler {
 
     public static final String KEYWORD = "terror"; // 9/11 terrorism terrorist
-    public static final int MAX_DOCS = 120;
+    public static final int MAX_DOCS = 12000;
     public static final long POLITENESS = 1000;
     public static final String[] SEEDS = {
             "http://september11.archive.org/",
@@ -111,6 +111,6 @@ public class Crawler {
         crawler.crawl();
         System.out.println(" -- Time used " +(System.currentTimeMillis()-startTime)/3600000.0+" hours.");
         crawler.stopIndexer();
-        System.out.println(" -- Time used " +(System.currentTimeMillis()-startTime)/3600000.0+" hours.");
+        System.out.println(" -- Total time used " +(System.currentTimeMillis()-startTime)/3600000.0+" hours.");
     }
 }
