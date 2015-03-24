@@ -105,12 +105,12 @@ public class Crawler {
     }
 
     public static void main(String[] args){
-        long time = System.currentTimeMillis();
+        long startTime = System.currentTimeMillis();
         Crawler crawler = new Crawler();
         crawler.startIndexer();
         crawler.crawl();
-        System.out.println((System.currentTimeMillis()-time)/3600000.0+" hours.");
+        System.out.println(" -- Time used " +(System.currentTimeMillis()-startTime)/3600000.0+" hours.");
         crawler.stopIndexer();
-        System.out.println((System.currentTimeMillis()-time)/3600000.0+" hours.");
+        System.out.println(" -- Time used " +(System.currentTimeMillis()-startTime)/3600000.0+" hours.");
     }
 }
