@@ -203,17 +203,16 @@ thread_create (const char *name, int priority,
   sf->eip = switch_entry;
   sf->ebp = 0;
 
+#ifdef USERPROG
   // create a new process
   struct process *process = process_create(tid);
   t->parent_tid = thread_tid();
   t->process = process;
   list_push_back(&thread_current()->subprocesses, &process->elem);
+#endif
 
   /* Add to run queue. */
   thread_unblock (t);
-  /* yield the current thread if the priority of new thread > the running one's */
-  if (priority > running_thread()->priority)
-    thread_yield();
 
   return tid;
 }
@@ -253,6 +252,9 @@ thread_unblock (struct thread *t)
   ASSERT (t->status == THREAD_BLOCKED);
   list_insert_ordered(&ready_list, &t->elem, compare_priority, NULL);
   t->status = THREAD_READY;
+
+  if (running_thread() != idle_thread && running_thread()->priority < t->priority)
+	  thread_yield();
   intr_set_level (old_level);
 }
 
@@ -407,9 +409,12 @@ thread_set_priority(int new_priority) {
 	if (max_p < new_priority)
 		thread_current()->priority = new_priority;
 
-	intr_set_level(old_level);
+	/* if there is a priority in ready list > new priority, yield */
+	struct list_elem *e = list_min(&ready_list, compare_priority, NULL);
+	if (list_entry(e, struct thread, elem)->priority > new_priority)
+		thread_yield();
 
-	thread_yield();
+	intr_set_level(old_level);
 }
 /* Returns the current thread's priority. */
 int
@@ -542,6 +547,7 @@ init_thread (struct thread *t, const char *name, int priority)
   t->waiting_lock = NULL;
   list_init(&t->holding_locks);
 
+#ifdef USERPROG
   /* initializes process information */
   t->fd = 2;				// 0 and 1 reserved
   t->parent_tid = -1;
@@ -549,6 +555,7 @@ init_thread (struct thread *t, const char *name, int priority)
   t->process = NULL;
   list_init(&t->subprocesses);
   list_init(&t->opened_files);
+#endif
 
   old_level = intr_disable ();
   list_push_back (&all_list, &t->allelem);
