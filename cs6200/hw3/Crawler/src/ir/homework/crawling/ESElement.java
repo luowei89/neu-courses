@@ -21,13 +21,11 @@ public class ESElement {
     private String id; // canonical URL
     private String text; // cleaned text
     private String html; // raw html text
-    private Set<String> inlinks; // inlinks list (canonical URLs)
     private Set<String> outlinks; // outlinks list (canonical URLs)
 
-    public ESElement(String url,Set<String> inlnks) throws Exception {
+    public ESElement(String url) throws Exception {
         id = url;
         text = "";
-        inlinks = inlnks;
         outlinks = new HashSet<String>();
         Document doc = Jsoup.connect(url).userAgent("Chrome").get();
         html = doc.html();
@@ -97,8 +95,9 @@ public class ESElement {
                     .field("id", id)
                     .field("text", text)
                     .field("html", html)
-                    .field("inlinks", inlinks)
-                    .field("outlinks", outlinks)
+                    // links empty when indexing
+                    .field("inlinks", new HashSet<String>())
+                    .field("outlinks", new HashSet<String>())
                     .endObject();
         } catch (IOException e) {
             e.printStackTrace();

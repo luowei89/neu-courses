@@ -13,8 +13,8 @@ import java.util.Set;
 public class Crawler {
 
     public static final String KEYWORD = "terror"; // 9/11 terrorism terrorist
-    public static final int MAX_DOCS = 12000;
-    public static final long POLITENESS = 200;
+    public static final int MAX_DOCS = 120;
+    public static final long POLITENESS = 1000;
     public static final String[] SEEDS = {
             "http://september11.archive.org/",
             "http://pentagon.spacelist.org/",
@@ -37,7 +37,7 @@ public class Crawler {
         frontier = new Frontier();
         indexer = new Indexer();
         for(String s : SEEDS){
-            frontier.add(s,null);
+            frontier.add(s);
         }
         crawled = new HashSet<String>();
         domianVisited = new HashMap<String, Long>();
@@ -45,34 +45,37 @@ public class Crawler {
 
     public void crawl(){
         while (!frontier.empty() && crawled.size() < MAX_DOCS) {
-            try {
-                String url = frontier.next();
-                Set<String> inlinks = frontier.getInlinks(url);
-                String domain = getDomainName(url);
-                if(domianVisited.containsKey(domain)) {
-                    Long timeFromLastVisited = System.currentTimeMillis() - domianVisited.get(domain);
-                    if (timeFromLastVisited < POLITENESS) {
+            String url = frontier.next();
+            String domain = getDomainName(url);
+            if(domianVisited.containsKey(domain)) {
+                Long timeFromLastVisited = System.currentTimeMillis() - domianVisited.get(domain);
+                if (timeFromLastVisited < POLITENESS) {
+                    try {
                         Thread.sleep(POLITENESS - timeFromLastVisited);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
                     }
                 }
-                ESElement ese = new ESElement(url, inlinks);
+            }
+            try {
+                ESElement ese = new ESElement(url);
                 domianVisited.put(domain, System.currentTimeMillis());
                 Set<String> newUrls = ese.getOutlinks();
                 if (newUrls.size() > 0) {
-                    indexer.buildIndex(ese);
                     crawled.add(url);
+                    indexer.buildIndex(crawled.size(),ese);
                     System.out.println("Crawling " + crawled.size() + "\t" + url);
                     for (String nu : newUrls) {
                         if (!crawled.contains(nu)) {
-                            frontier.add(nu, url);
-                        } else {
-                            indexer.updateInlinks(nu, url);
+                            frontier.add(nu);
                         }
+                        indexer.addLink(nu,url);
                     }
                 }
                 //}
             } catch (Exception e) {
                 // failed analyze url continue to next
+                indexer.removeLink(url);
                 // e.printStackTrace();
             }
         }
@@ -98,7 +101,7 @@ public class Crawler {
     }
 
     public void stopIndexer() {
-        indexer.stopIndexer();
+        indexer.updateLinks();
     }
 
     public static void main(String[] args){
@@ -106,7 +109,8 @@ public class Crawler {
         Crawler crawler = new Crawler();
         crawler.startIndexer();
         crawler.crawl();
+        System.out.println((System.currentTimeMillis()-time)/3600000.0+" hours.");
         crawler.stopIndexer();
-        System.out.println((System.currentTimeMillis()-time)/1000.0/60.0/60.0+" hours.");
+        System.out.println((System.currentTimeMillis()-time)/3600000.0+" hours.");
     }
 }
