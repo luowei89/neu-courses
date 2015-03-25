@@ -159,7 +159,7 @@ public class Indexer extends Thread {
                 HashMap<String, Object> updateObject = new HashMap<String, Object>();
                 updateObject.put("inlinks",inlinksMap.get(doc));
                 updateObject.put("outlinks",outlinksMap.get(doc));
-                client.prepareUpdate("crawler_data", "document", "" + doc)
+                client.prepareUpdate("crawler_data", "document", doc)
                         .setDoc(updateObject)
                         .execute()
                         .actionGet();
