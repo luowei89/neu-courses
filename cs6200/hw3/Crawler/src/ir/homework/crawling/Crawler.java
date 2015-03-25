@@ -19,13 +19,13 @@ public class Crawler {
             "http://september11.archive.org/",
             "http://pentagon.spacelist.org/",
             "http://www.911research.wtc7.net/",
+            "http://www.history.com/topics/9-11-attacks",
+            "http://www.cnn.com/2013/07/27/us/september-11-anniversary-fast-facts/",
             "http://en.wikipedia.org/wiki/September_11_attacks",
             "http://en.wikipedia.org/wiki/Collapse_of_the_World_Trade_Center",
-            "http://en.wikipedia.org/wiki/United_Airlines_Flight_93",
             "http://en.wikipedia.org/wiki/American_Airlines_Flight_77",
             "http://en.wikipedia.org/wiki/List_of_terrorist_incidents",
-            "http://en.wikipedia.org/wiki/The_Pentagon",
-            "http://en.wikipedia.org/wiki/World_Trade_Center"
+            "http://en.wikipedia.org/wiki/The_Pentagon"
     };
 
     private Frontier frontier;

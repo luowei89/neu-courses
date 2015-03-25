@@ -137,9 +137,9 @@ public class Indexer extends Thread {
             XContentBuilder builder = ese.getBuilder();
             System.out.println("Indexing " + docId + "\t" + ese.getId());
             IndexResponse response = null;
-            while(response == null || !response.getId().equals(""+docId)){
+            while(response == null || !response.getId().equals(ese.getId())){
                 // ensure success index creation
-                response = client.prepareIndex("crawler_data", "document", "" + docId)
+                response = client.prepareIndex("crawler_data", "document", ese.getId())
                         .setSource(builder)
                         .execute()
                         .actionGet();
@@ -159,7 +159,7 @@ public class Indexer extends Thread {
                 HashMap<String, Object> updateObject = new HashMap<String, Object>();
                 updateObject.put("inlinks",inlinksMap.get(doc));
                 updateObject.put("outlinks",outlinksMap.get(doc));
-                client.prepareUpdate("crawler_data", "document", "" + docIdMap.get(doc))
+                client.prepareUpdate("crawler_data", "document", "" + doc)
                         .setDoc(updateObject)
                         .execute()
                         .actionGet();
