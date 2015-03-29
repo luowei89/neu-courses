@@ -20,7 +20,7 @@ import java.util.Set;
 public class Crawler {
 
     public static final String KEYWORD = "terror"; // 9/11 terrorism terrorist
-    public static final int MAX_DOCS = 12000;
+    public static final int MAX_DOCS = 120;
     public static final long POLITENESS = 1000;
     public static final String[] SEEDS = {
             "http://september11.archive.org/",
@@ -68,7 +68,8 @@ public class Crawler {
                 }
                 rules = domianRules.get(domain);
             } else {
-                rules = findRobotsRules(domain);
+                rules = findRobotsRules(url);
+                domianRules.put(domain,rules);
             }
             try {
                 if(!rules.isAllowed(url)){
@@ -95,17 +96,21 @@ public class Crawler {
                 // e.printStackTrace();
             }
         }
+        while (!frontier.empty()){
+            String url = frontier.next();
+            indexer.removeLink(url);
+        }
         System.out.println("Documents crawled: " + crawled.size());
     }
 
-    private BaseRobotRules findRobotsRules(String domain) {
+    private BaseRobotRules findRobotsRules(String url) {
         BaseRobotRules rules = null;
         try {
-            InputStream robotsStream = new URL("http://"+domain+"/robots.txt").openStream();
+            URL netUrl = new URL(url);
+            InputStream robotsStream = new URL(netUrl.getProtocol()+"://"+netUrl.getHost()+"/robots.txt").openStream();
             SimpleRobotRulesParser srrParser = new SimpleRobotRulesParser();
-            rules = srrParser.parseContent("http://"+domain,
+            rules = srrParser.parseContent(netUrl.getProtocol()+"://"+netUrl.getHost(),
                     IOUtils.toByteArray(robotsStream),"text/plain","Googlebot");
-            domianRules.put(domain, rules);
         } catch (MalformedURLException e) {
             e.printStackTrace();
         } catch (IOException e) {

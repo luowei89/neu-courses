@@ -2,6 +2,7 @@ package ir.homework.crawling;
 
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.common.xcontent.XContentFactory;
+import org.elasticsearch.search.SearchHit;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -10,6 +11,7 @@ import org.jsoup.select.Elements;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -22,11 +24,13 @@ public class ESElement {
     private String title; // title
     private String text; // cleaned text
     private String html; // raw html text
+    private Set<String> inlinks;
     private Set<String> outlinks; // outlinks list (canonical URLs)
 
     public ESElement(String url) throws Exception {
         id = url;
         text = "";
+        inlinks = null;
         outlinks = new HashSet<String>();
         Document doc = Jsoup.connect(url).userAgent("Chrome").get();
         title = doc.title();
@@ -58,6 +62,15 @@ public class ESElement {
         for (Element textElement : textElements) {
             text += textElement.text() + " ";
         }
+    }
+
+    public ESElement(SearchHit hit){
+        id = (String)hit.getSource().get("id");
+        text = (String)hit.getSource().get("text");
+        title = (String)hit.getSource().get("title");
+        html = (String)hit.getSource().get("html");
+        inlinks = new HashSet<String>((ArrayList)hit.getSource().get("inlinks"));
+        outlinks = new HashSet<String>((ArrayList)hit.getSource().get("outlinks"));
     }
 
     protected String canonicalizeURL(String url){
@@ -99,13 +112,22 @@ public class ESElement {
                     .field("text", text)
                     .field("html", html)
                     // links empty when indexing
-                    .field("inlinks", new HashSet<String>())
-                    .field("outlinks", new HashSet<String>())
+                    .field("inlinks", inlinks == null?new HashSet<String>():inlinks)
+                    .field("outlinks", inlinks == null?new HashSet<String>():outlinks)
                     .endObject();
         } catch (IOException e) {
             e.printStackTrace();
         }
         return builder;
+    }
+
+    public void mergeLinks(ESElement oldEse) {
+        inlinks.addAll(oldEse.getInlinks());
+        outlinks.addAll(oldEse.getOutlinks());
+    }
+
+    public Set<String> getInlinks() {
+        return inlinks;
     }
 
     public Set<String> getOutlinks() {

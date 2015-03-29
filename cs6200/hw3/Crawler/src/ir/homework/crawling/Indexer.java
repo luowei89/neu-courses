@@ -15,7 +15,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
  * Information Retrieval Homework
  * Created by Wei Luo on 3/19/15.
  */
-public class Indexer extends Thread {
+public class Indexer {
 
     private Node node;
     private Client client;
@@ -92,8 +92,8 @@ public class Indexer extends Thread {
         inlinks.add(from);
         inlinksMap.put(to,inlinks);
         Set<String> outlinks;
-        if(inlinksMap.containsKey(from)){
-            outlinks = inlinksMap.get(from);
+        if(outlinksMap.containsKey(from)){
+            outlinks = outlinksMap.get(from);
         } else {
             outlinks = new HashSet<String>();
         }
@@ -160,7 +160,7 @@ public class Indexer extends Thread {
             while(doc != null){
                 System.out.println("Updating " + docIdMap.get(doc) + "\t" + doc);
                 HashMap<String, Object> updateObject = new HashMap<String, Object>();
-                updateObject.put("inlinks",inlinksMap.get(doc));
+                updateObject.put("inlinks",inlinksMap.get(doc)==null?new HashSet<String>():inlinksMap.get(doc));
                 updateObject.put("outlinks",outlinksMap.get(doc));
                 client.prepareUpdate(INDEX_NAME, DOC_TYPE, doc)
                         .setDoc(updateObject)
