@@ -30,6 +30,9 @@ public class Indexer extends Thread {
     private IndexThread[] indexThreads;
     private UpdateThread[] updateThreads;
 
+    private static final String INDEX_NAME = "crawler_data_luo";
+    private static final String DOC_TYPE = "document";
+
     public Indexer(){
         node = NodeBuilder.nodeBuilder().node();
         client = node.client();
@@ -139,7 +142,7 @@ public class Indexer extends Thread {
             IndexResponse response = null;
             while(response == null || !response.getId().equals(ese.getId())){
                 // ensure success index creation
-                response = client.prepareIndex("crawler_data", "document", ese.getId())
+                response = client.prepareIndex(INDEX_NAME, DOC_TYPE, ""+docId)
                         .setSource(builder)
                         .execute()
                         .actionGet();
@@ -159,7 +162,7 @@ public class Indexer extends Thread {
                 HashMap<String, Object> updateObject = new HashMap<String, Object>();
                 updateObject.put("inlinks",inlinksMap.get(doc));
                 updateObject.put("outlinks",outlinksMap.get(doc));
-                client.prepareUpdate("crawler_data", "document", doc)
+                client.prepareUpdate(INDEX_NAME, DOC_TYPE, ""+docIdMap.get(doc))
                         .setDoc(updateObject)
                         .execute()
                         .actionGet();
