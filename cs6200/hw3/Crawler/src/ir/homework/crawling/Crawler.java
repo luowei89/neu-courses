@@ -110,6 +110,8 @@ public class Crawler {
             e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
+        } catch (Exception e) {
+            e.printStackTrace();
         } finally {
             if(rules == null){
                 rules = new SimpleRobotRules(SimpleRobotRules.RobotRulesMode.ALLOW_ALL);
