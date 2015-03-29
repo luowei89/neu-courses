@@ -13,3 +13,5 @@ digits
 svm_light
 *.iml
 target
+
+docs
