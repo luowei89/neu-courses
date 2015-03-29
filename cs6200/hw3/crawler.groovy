@@ -14,7 +14,7 @@ PUT /crawler_data/
       "analyzer": {
         "my_english": { 
           "type": "english",
-          "stopwords_path": "path_to_stopwords.txt"
+          "stopwords_path": "stoplist.txt"
         }
       }
     }
@@ -29,6 +29,12 @@ PUT /crawler_data/document/_mapping
         "type": "string",
         "store": true,
         "index": "not_analyzed"
+      },
+      "title": {
+        "type": "string",
+        "store": true,
+        "index": "analyzed",
+        "analyzer": "my_english"
       },
       "text": {
         "type": "string",
