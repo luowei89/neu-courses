@@ -1,5 +1,12 @@
 package ir.homework.crawling;
 
+import crawlercommons.robots.BaseRobotRules;
+import crawlercommons.robots.SimpleRobotRules;
+import crawlercommons.robots.SimpleRobotRulesParser;
+import org.apache.commons.io.IOUtils;
+
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.HashMap;
@@ -32,6 +39,7 @@ public class Crawler {
     private Indexer indexer;
     private Set<String> crawled;
     private HashMap<String,Long> domianVisited;
+    private HashMap<String,BaseRobotRules> domianRules;
 
     public Crawler(){
         frontier = new Frontier();
@@ -41,12 +49,14 @@ public class Crawler {
         }
         crawled = new HashSet<String>();
         domianVisited = new HashMap<String, Long>();
+        domianRules = new HashMap<String, BaseRobotRules>();
     }
 
     public void crawl(){
         while (!frontier.empty() && crawled.size() < MAX_DOCS) {
             String url = frontier.next();
             String domain = getDomainName(url);
+            BaseRobotRules rules;
             if(domianVisited.containsKey(domain)) {
                 Long timeFromLastVisited = System.currentTimeMillis() - domianVisited.get(domain);
                 if (timeFromLastVisited < POLITENESS) {
@@ -56,8 +66,14 @@ public class Crawler {
                         e.printStackTrace();
                     }
                 }
+                rules = domianRules.get(domain);
+            } else {
+                rules = findRobotsRules(domain);
             }
             try {
+                if(!rules.isAllowed(url)){
+                    continue;
+                }
                 ESElement ese = new ESElement(url);
                 domianVisited.put(domain, System.currentTimeMillis());
                 Set<String> newUrls = ese.getOutlinks();
@@ -80,6 +96,26 @@ public class Crawler {
             }
         }
         System.out.println("Documents crawled: " + crawled.size());
+    }
+
+    private BaseRobotRules findRobotsRules(String domain) {
+        BaseRobotRules rules = null;
+        try {
+            InputStream robotsStream = new URL("http://"+domain+"/robots.txt").openStream();
+            SimpleRobotRulesParser srrParser = new SimpleRobotRulesParser();
+            rules = srrParser.parseContent("http://"+domain,
+                    IOUtils.toByteArray(robotsStream),"text/plain","Googlebot");
+            domianRules.put(domain, rules);
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            if(rules == null){
+                rules = new SimpleRobotRules(SimpleRobotRules.RobotRulesMode.ALLOW_ALL);
+            }
+        }
+        return rules;
     }
 
     private String getDomainName(String url) {
