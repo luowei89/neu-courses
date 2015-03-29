@@ -119,18 +119,18 @@ public class IndexMerger {
             System.out.println("Updating " + ese.getId());
             StringBuffer sb = new StringBuffer();
             if(ese.getInlinks().size() > 0) {
-                sb.append("ctx._source.inlinks = ctx._source.inlinks.unique(false); ctx._source.inlinks");
+                sb.append("ctx._source.inlinks");
                 for(String in : ese.getInlinks()){
                     sb.append("<<"+"\""+in+"\"");
                 }
-                sb.append("; ");
+                sb.append("; ctx._source.inlinks=ctx._source.inlinks.unique(); ");
             }
             if(ese.getOutlinks().size() > 0) {
-                sb.append("ctx._source.outlinks = ctx._source.outlinks.unique(false); ctx._source.outlinks");
+                sb.append("ctx._source.outlinks");
                 for(String out : ese.getOutlinks()){
                     sb.append("<<"+"\""+out+"\"");
                 }
-                sb.append("; ");
+                sb.append("; ctx._source.outlinks = ctx._source.outlinks.unique(); ");
             }
             String script = sb.toString();
             if(script != ""){

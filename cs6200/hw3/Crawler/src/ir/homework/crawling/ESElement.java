@@ -32,8 +32,11 @@ public class ESElement {
         text = "";
         inlinks = null;
         outlinks = new HashSet<String>();
-        Document doc = Jsoup.connect(url).userAgent("Chrome").get();
+        Document doc = Jsoup.connect(url).userAgent("Googlebot").get();
         title = doc.title();
+        if(title == null || title == ""){
+            title = id;
+        }
         html = doc.html();
         if (!(html.contains(Crawler.KEYWORD))) {
             // no need to crawl
