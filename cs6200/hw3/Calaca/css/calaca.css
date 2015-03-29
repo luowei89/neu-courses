@@ -134,6 +134,11 @@ body {
   color: #00cc99;
   margin-bottom: 5px;
 }
+.result a {
+  font-size: 20px;
+  color: #00cc99;
+  margin-bottom: 5px;
+}
 /* Result */
 
 /* ng-repeat animation */

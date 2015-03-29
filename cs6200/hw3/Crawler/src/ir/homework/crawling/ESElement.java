@@ -19,6 +19,7 @@ import java.util.Set;
  */
 public class ESElement {
     private String id; // canonical URL
+    private String title; // title
     private String text; // cleaned text
     private String html; // raw html text
     private Set<String> outlinks; // outlinks list (canonical URLs)
@@ -28,6 +29,7 @@ public class ESElement {
         text = "";
         outlinks = new HashSet<String>();
         Document doc = Jsoup.connect(url).userAgent("Chrome").get();
+        title = doc.title();
         html = doc.html();
         if (!(html.contains(Crawler.KEYWORD))) {
             // no need to crawl
@@ -93,6 +95,7 @@ public class ESElement {
             builder = XContentFactory.jsonBuilder()
                     .startObject()
                     .field("id", id)
+                    .field("title",title)
                     .field("text", text)
                     .field("html", html)
                     // links empty when indexing
