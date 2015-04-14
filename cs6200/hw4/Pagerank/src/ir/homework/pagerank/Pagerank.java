@@ -1,9 +1,7 @@
 package ir.homework.pagerank;
 
 import java.io.*;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Information Retrieval Homework
@@ -82,11 +80,15 @@ public class Pagerank {
     }
 
     public void printPagerank(String file){
+        // Sort the ranks
+        PagerankComparator prc =  new PagerankComparator(prTable);
+        TreeMap<String,Double> sorted = new TreeMap<String,Double>(prc);
+        sorted.putAll(prTable);
         try {
             File f = new File(file);
             FileOutputStream fos = new FileOutputStream(f);
             BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(fos));
-            for (String doc : prTable.keySet()) {
+            for (String doc : sorted.keySet()) {
                 bw.write(doc + "  \t" + prTable.get(doc)+"\n");
                 //System.out.println(doc + "  \t" + prTable.get(doc));
             }
@@ -107,5 +109,21 @@ public class Pagerank {
         String output_file = "../../data/pagerank.txt";
         pr.printPagerank(output_file);
 
+    }
+
+    public class PagerankComparator implements Comparator<String> {
+
+        Map<String, Double> base;
+        public PagerankComparator(Map<String, Double> base) {
+            this.base = base;
+        }
+
+        public int compare(String a, String b) {
+            if (base.get(a) >= base.get(b)) {
+                return -1;
+            } else {
+                return 1;
+            }
+        }
     }
 }
