@@ -31,12 +31,12 @@
     <p class='no-results' ng-show='!results.length && !loading'>No Results</p>
     <article class='result' ng-repeat='result in results track by $id(result)'>
       <h2>
-      	<a href={{result.id}}>{{result.title}}</a>
       	<select ng-model='result.relevant'>
           <option value=0>non-relevant</option> 
           <option value=1>relevant</option> 
           <option value=2>very relevant</option> 
         </select>
+        <a href={{result.id}} target='_blank'>{{result.title}}</a>
     </h2>
     </article>
   </section>
