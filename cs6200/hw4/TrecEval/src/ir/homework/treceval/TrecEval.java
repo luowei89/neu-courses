@@ -1,5 +1,12 @@
 package ir.homework.treceval;
 
+import org.jfree.chart.ChartFactory;
+import org.jfree.chart.ChartPanel;
+import org.jfree.chart.ChartUtilities;
+import org.jfree.chart.JFreeChart;
+import org.jfree.data.xy.XYSeries;
+import org.jfree.data.xy.XYSeriesCollection;
+
 import java.io.*;
 import java.util.*;
 
@@ -96,6 +103,7 @@ public class TrecEval {
             if(qOption){
                 evaluations.get(key).print();
             }
+            evaluations.get(key).plotPrecRecall();
             sum_e.add(evaluations.get(key));
         }
         sum_e.avg(evaluations.size());
@@ -151,6 +159,9 @@ public class TrecEval {
         private HashMap<Integer,Double> precisions;
         private HashMap<Integer,Double> recalls;
         private HashMap<Integer,Double> f1s;
+        //for the plot
+        private List<Double> precList;
+        private List<Double> recallList;
 
         public Evaluation(String query){
             queryId = query;
@@ -168,6 +179,8 @@ public class TrecEval {
                 recalls.put(k,0.0);
                 f1s.put(k,0.0);
             }
+            precList = new ArrayList<Double>();
+            recallList = new ArrayList<Double>();
         }
 
         public void evaluate(){
@@ -189,11 +202,15 @@ public class TrecEval {
                 rec_rel += t?1:0;
                 r.add(t?1:0);
                 double prec = rec_rel *1.0/i;
+                double recall = rec_rel *1.0/num_rel;
+
+                precList.add(prec);
+                recallList.add(recall);
+
                 if(t){
                     sum_prec += prec;
                 }
                 if(ks.contains(i)){
-                    double recall = rec_rel *1.0/num_rel;
                     precisions.put(i,prec);
                     recalls.put(i,recall);
                     if(prec*recall == 0){
@@ -256,6 +273,52 @@ public class TrecEval {
 
             sb.append("============================================================\n");
             System.out.println(sb.toString());
+        }
+
+        public void plotPrecRecall(){
+            double recall_level[] = {0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0};
+            XYSeriesCollection dataset = new XYSeriesCollection();
+            XYSeries precs = new XYSeries("Precision");
+            XYSeries interpolated_precs = new XYSeries("Interpolated Precision");
+
+            int i = 0;
+            for(double rec : recall_level){
+                while(i < recallList.size() && recallList.get(i) < rec){
+                    i++;
+                }
+                if(i < recallList.size()){
+                    precs.add(rec,precList.get(i));
+                } else {
+                    precs.add(rec,0);
+                }
+            }
+
+            double[] reverse_recall = {1.0, 0.9, 0.8, 0.7, 0.6, 0.5, 0.4, 0.3, 0.2, 0.1, 0.0};
+            double current_max = 0;
+            i = recallList.size() - 1;
+            for(double rec : reverse_recall){
+                while(i >= 0 && recallList.get(i) >= rec){
+                    if(current_max < precList.get(i)){
+                        current_max = precList.get(i);
+                    }
+                    i--;
+                }
+                interpolated_precs.add(rec,current_max);
+            }
+
+            dataset.addSeries(precs);
+            dataset.addSeries(interpolated_precs);
+            String chartTitle = "Precision-Recall Curve " + queryId;
+            String xAxisLabel = "Recall";
+            String yAxisLabel = "Precision";
+
+            JFreeChart chart = ChartFactory.createXYLineChart(chartTitle,
+                    xAxisLabel, yAxisLabel, dataset);
+            try {
+                ChartUtilities.saveChartAsPNG(new File("curve_"+queryId+".png"),chart,400,400);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
 
         public void add(Evaluation e) {
