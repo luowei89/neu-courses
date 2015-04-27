@@ -242,6 +242,7 @@ public class DataProcessor {
             HashMap<String,String> docs = assesses.get(queryId);
             for(String docId : docs.keySet()){
                 sb.append(queryId+"-"+docId);
+                sb.append(", "+okapiTf(docIdMap.get(docId), terms));
                 sb.append(", "+tfIdfScore(docIdMap.get(docId), terms));
                 sb.append(", "+bm25Score(docIdMap.get(docId),terms));
                 sb.append(", "+lmScore(docIdMap.get(docId), terms));
@@ -342,6 +343,21 @@ public class DataProcessor {
         int rangeOfWindow = getMinSpan(termsPositions);
         double proximity = (C - rangeOfWindow) * numContainTerms / ((double)(docLengthMap.get(docId)+termsMap.size()));
         return proximity + tfIdfScore(docId,terms);
+    }
+
+    private double okapiTf(int docId, String[] terms){
+        double score = 0;
+        for(String term : terms){
+            if(termsMap.containsKey(term)) {
+                int termId = termsMap.get(term);
+                if (docsIndex.get(termId).containsKey(docId)) {
+                    int tf = docsIndex.get(termId).get(docId).size();
+                    double avgDocLength = totalDocLength / (double) totalDocs;
+                    score += tf / (tf + 0.5 + 1.5 * (docLengthMap.get(docId) / avgDocLength));
+                }
+            }
+        }
+        return score;
     }
 
     private int getMinSpan(List<List<Integer>> termsPositions) {

@@ -54,6 +54,9 @@ public class LearningModel {
                 sb.append(" " + rank++);
                 sb.append(" "+ queryScores.get(doc));
                 sb.append(" Exp\n");
+                if(rank > 1000){
+                    break;
+                }
             }
         }
         try {
